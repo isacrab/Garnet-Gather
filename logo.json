@@ -1,0 +1,147 @@
+[
+     {
+    "_id": 1,
+    "location": "Chick-Fil-A",
+    "logoUrl": TBD
+     },
+
+     {
+    "_id": 2,
+    "location": "4 Rivers",
+    "logoUrl": TBD
+     },
+
+     {
+    "_id": 3,
+    "location": "Panera Bread",
+    "logoUrl": TBD
+     },
+
+     {
+    "_id": 4,
+    "location": "Panda Express",
+    "logoUrl": TBD
+     },
+        
+    {
+    "_id": 5,
+    "location": "Proof",
+    "logoUrl": TBD
+    },
+        
+     {
+    "_id": 6,
+    "location": "Suwannee",
+    "logoUrl": TBD
+     },
+        
+     {
+    "_id": 7,
+    "location": "Seminole Cafe",
+    "logoUrl": TBD
+     },
+        
+     {
+    "_id": 8,
+    "location": "Argo Tea",
+    "logoUrl": TBD
+     },
+       
+     {
+    "_id": 9,
+    "location":"Bento Sushi",
+    "logoUrl": TBD
+     },
+        
+     {
+    "_id": 10,
+    "location": "Brooklyn Pizza",
+    "logoUrl": TBD
+     },
+        
+     {
+    "_id": 11,
+    "location": "The Den",
+    "logoUrl": TBD
+     },
+        
+     {
+    "_id": 12,
+    "location": "Einstein Bros. Bagels",
+    "logoUrl": TBD
+     },
+        
+     {
+    "_id": 13,
+    "location": "Pollo Tropical",
+    "logoUrl": TBD
+     },
+        
+     {
+    "_id": 14,
+    "location": "Starbucks (Dirac)",
+    "logoUrl": TBD
+     },
+        
+     {
+    "_id": 15,
+    "location": "Starbucks (Stroz)",
+    "logoUrl": TBD
+     },
+        
+     {
+    "_id": 16,
+    "location": "Starbucks (Union)",
+    "logoUrl": TBD
+     },
+        
+     {
+    "_id": 17,
+    "location": "Starbucks (1851)",
+    "logoUrl": TBD
+     },
+        
+     {
+    "_id": 18,
+    "location": "Halal Shack",
+    "logoUrl": TBD
+     },
+       
+     {
+    "_id": 19,
+    "location": "Subway",
+    "logoUrl": TBD
+     },
+       
+     {
+    "_id": 20,
+    "location": "Tally-Mac-Shack",
+    "logoUrl": TBD
+     },
+        
+     {
+    "_id": 21,
+    "location": "Three Torches",
+    "logoUrl": TBD
+     },
+       
+     {
+    "_id": 22,
+    "location": "Joe Mama's",
+    "logoUrl": TBD
+     },
+        
+     {
+    "_id": 23,
+    "location": "Vato Tacos",
+    "logoUrl": TBD
+     },
+        
+     {
+    "_id": 24,
+    "location": "Shake Smart",
+    "logoUrl": TBD
+     }
+
+]
+
