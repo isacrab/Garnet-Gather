@@ -35,3 +35,6 @@ To run application:
     - if its not running, you will get an error when you follow link
 
 
+
+to get all the dependencies:
+pip install -r requirements.txt
