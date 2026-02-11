@@ -1,4 +1,7 @@
 #all database schema stuff in here!
+
+#RBAC TODO: HASH PASSWORDS, Check if users already exist using email, only fsu.edu accepted,
+
 import os
 import mysql.connector
 from dotenv import load_dotenv
@@ -31,6 +34,8 @@ def dropTables():   #to keep check our bases
     conn = getConnection()
     cursor = conn.cursor()
     #drop tables here if needed
+    cursor.execute('DROP TABLE Users CASCADE')
+
 
     conn.commit()
     cursor.close()
@@ -58,12 +63,31 @@ def createTables():
     cursor.close()
     conn.close()
 
+#creates users, default param at end to determine what role it is
+def createUser(username,password,email,fname,lname,role=0):
+    if role!=0:
+        print("user is an rso admin") #RBAC TODO: assign roles
+    
+    conn = getConnection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+            INSERT INTO Users (username, passwordHash, email, firstname, lastname, role)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (username, password, email, fname, lname, role))       #works, checked with print statements
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
 
 def startDB():
-    #here ask if we want to drop tables?
-
     testConnectDB() #try see if successful
     createTables()
 
 if __name__ == '__main__':
+    ans = input("Drop tables? y/n: ").lower()
+    if ans == 'y':
+        dropTables()
+
     startDB()
