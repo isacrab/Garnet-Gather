@@ -110,19 +110,6 @@ def createSchedules(username,classname,dayofweek,starttime,endtime):
     conn.commit()
     cursor.close()
     conn.close()
-    
-
-def startDB():
-    testConnectDB() #try see if successful
-    createTables()
-
-if __name__ == '__main__':
-    ans = input("Drop tables? y/n: ").lower()
-    if ans == 'y':
-        dropTables()
-
-    startDB()
-
 
 #chicken tinder 
 def createDiningTables():
@@ -169,7 +156,7 @@ def createDiningTables():
 
 def createEventTables():
     conn = getConnection()
-    cursor = con.cursor()
+    cursor = conn.cursor()
 
     #Main event table
     cursor.execute('CREATE TABLE IF NOT EXISTS Events (' +
@@ -215,4 +202,42 @@ def createEventTables():
     conn.commit()
     cursor.close()
     conn.close()
-      
+
+def createEvent():
+    conn = getConnection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+            INSERT INTO Events()()""")
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
+def createDining():
+    conn = getConnection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+            INSERT INTO Restaurants()()""")
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+
+def startDB():
+    testConnectDB() #try see if successful
+    createTables()
+    createDiningTables()
+    createEventTables()
+
+if __name__ == '__main__':
+    ans = input("Drop tables? y/n: ").lower()
+    if ans == 'y':
+        dropTables()
+
+    startDB()
+
+
