@@ -92,7 +92,7 @@ def createUser(username,password,email,fname,lname,role=0):
     cursor = conn.cursor()
 
     cursor.execute("""
-            INSERT INTO Users (username, passwordHash, email, firstname, lastname, role)
+            INSERT INTO Users (username, passwordHash, email, firstName, lastName, role)
             VALUES (%s, %s, %s, %s, %s, %s)
         """, (username, password, email, fname, lname, role))       #works, checked with print statements
     
@@ -104,7 +104,7 @@ def createSchedules(username,classname,dayofweek,starttime,endtime):
     conn = getConnection()
     cursor = conn.cursor()
     cursor.execute("""
-            INSERT INTO Schedules (username,classname,dayofweek,starttime,endtime)
+            INSERT INTO Schedules (username, classname, dayofweek, starttime, endtime)
             VALUES (%s, %s, %s, %s, %s)
             """, (username, classname, dayofweek, starttime, endtime))
     conn.commit()
@@ -122,3 +122,97 @@ if __name__ == '__main__':
         dropTables()
 
     startDB()
+
+
+#chicken tinder 
+def createDiningTables():
+    conn = getConnection()
+    cursor = conn.cursor()
+    
+    #Restaurant creation table
+    cursor.execute('CREATE TABLE IF NOT EXISTS Restaurants (' +
+                    'id INT AUTO_INCREMENT PRIMARY KEY, ' +     #autoincrement to assign id to each restaurant
+                    'name VARCHAR(100) NOT NULL, ' +
+                    'imageUrl VARCHAR(250), ' +
+                    ')')
+
+    #Dining session table (per event)
+    cursor.execute('CREATE TABLE IF NOT EXISTS DiningSessions (' +
+                    'id INT AUTO_INCREMENT PRIMARY KEY, ' +
+                    'eventId INT NOT NULL' +
+                    'FOREIGN KEY (eventId) REFERENCES Events(id) ON DELETE CASCADE' +
+                    ')')
+
+    #Table to track those coming to dining session
+    cursor.execute('CREATE TABLE IF NOT EXISTS DiningMembers (' +
+                    'id INT AUTO_INCREMENT PRIMARY KEY, ' +
+                    'username VARCHAR(50) NOT NULL,' +
+                    'PRIMARY KEY (eventId, username), ' +
+                    'FOREIGN KEY (eventIs) REFERENCES Events(id) ON DELETE CASCADE, '+
+                    'FOREIGN KEY (username) REFERENCES Users(username) ON DELETE CASCADE' +
+                    ')')
+    
+    #Table to track people's votes for restaurants
+    cursor.execute('CREATE TABLE IF NOT EXISTS DiningVotes (' +
+                    'id INT AUTO_INCREMENT PRIMARY KEY, ' +
+                    'eventId INT NOT NULL, ' +
+                    'username VARCHAR(50) NOT NULL, ' +
+                    'restaurantId INT NOT NULL, ' +
+                    'vote BOOLEAN NOT NULL, ' +
+                    'FOREIGN KEY (eventId) REFERENCES Events(id) ON DELETE CASCADE, ' +
+                    'FOREIGN KEY (username) REFERENCES Users(username) ON DELETE CASCADE, ' +
+                    'FOREIGN KEY (restaurantId) REFERENCES Restaurants(id) ON DELETE CASCADE ' +
+                    ')')
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def createEventTables():
+    conn = getConnection()
+    cursor = con.cursor()
+
+    #Main event table
+    cursor.execute('CREATE TABLE IF NOT EXISTS Events (' +
+                    'id INT AUTO_INCREMENT PRIMARY KEY, ' +
+                    'eventName VARCHAR(100) NOT NULL, ' +
+                    'location VARCHAR(150) NOT NULL, ' +
+                    'eventDate DATE NOT NULL, ' +
+                    'startTime TIME NOT NULL, ' +
+                    'endTime TIME NOT NULL, ' +
+                    'description TEXT, ' +
+                    'eventType, ' +
+                    'eventStatus, ' +
+                    'organizationName, ' +
+                    'createdBy VARCHAR(50) NOT NULL, ' +
+                    'isDiningEvent BOOLEAN DEFAULT FALSE, ' +   #should chicken tinder be included 
+                    'FOREIGN KEY(createdBy) REFERENCES Users(username) ON DELETE CASCADE ' +
+                    ')')
+
+    #Event members table
+    cursor.execute('CREATE TABLE IF NOT EXISTS EventMembers (' +
+                    'id INT AUTO_INCREMENT PRIMARY KEY, ' +
+                    'eventId INT NOT NULL, ' +
+                    'username VARCHAR(50) NOT NULL, ' +
+                    'FOREIGN KEY (eventId) REFERENCES Events(id) ON DELETE CASCADE, ' +
+                    'FOREIGN KEY (username) REFERENCES Users(username) ON DELETE CASCADE ' +
+                    ')')
+
+    #Org table
+    cursor.execute('CREATE TABLE IF NOT EXISTS Organizations (' +
+                    'id INT AUTO_INCREMENT PRIMARY KEY, ' +
+                    'orgName VARCHAR(100) NOT NULL ' +
+                    ')')
+
+    #Org members table
+    cursor.execute('CREATE TABLE IF NOT EXISTS OrgMembers (' +
+                    'id INT AUTO_INCREMENT PRIMARY KEY, ' +
+                    'orgId INT NOT NULL, ' +
+                    'username VARCHAR(50) NOT NULL, ' +
+                    'FOREIGN KEY (orgId) REFERENCES Organizations(id) ON DELETE CASCADE, ' +
+                    'FOREIGN KEY (username) REFERENCES Users(username) ON DELET CASCADE ' +
+                    ')')
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+      
