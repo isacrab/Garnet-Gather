@@ -35,14 +35,28 @@ def dropTables():   #to keep check our bases
     conn = getConnection()
     cursor = conn.cursor()
     #drop tables here if needed
-    cursor.execute('DROP TABLE Users CASCADE')
+
+    #cursor.execute('DROP TABLE Users CASCADE')
+
+    cursor.execute("SET FOREIGN_KEY_CHECKS=0")
+    cursor.execute('DROP TABLE IF EXISTS DiningVotes')
+    cursor.execute('DROP TABLE IF EXISTS DiningMembers')
+    cursor.execute('DROP TABLE IF EXISTS DiningSessions')
+    cursor.execute('DROP TABLE IF EXISTS EventMembers') 
+    cursor.execute('DROP TABLE IF EXISTS OrgMembers')
+    cursor.execute('DROP TABLE IF EXISTS Events')
+    cursor.execute('DROP TABLE IF EXISTS Organizations')
+    cursor.execute('DROP TABLE IF EXISTS Restaurants')
+    cursor.execute('DROP TABLE IF EXISTS Schedules')    
+    cursor.execute('DROP TABLE IF EXISTS Users')
+    cursor.execute("SET FOREIGN_KEY_CHECKS=1")
 
 
     conn.commit()
     cursor.close()
     conn.close()
 
-def createTables():
+def createUsersTables():
     conn = None
     conn = getConnection()
     cursor = conn.cursor()
@@ -118,24 +132,25 @@ def createDiningTables():
     
     #Restaurant creation table
     cursor.execute('CREATE TABLE IF NOT EXISTS Restaurants (' +
-                    'id INT AUTO_INCREMENT PRIMARY KEY, ' +     #autoincrement to assign id to each restaurant
+                    'id INT PRIMARY KEY, ' +     #autoincrement to assign id to each restaurant
                     'name VARCHAR(100) NOT NULL, ' +
-                    'imageUrl VARCHAR(250), ' +
-                    ')')
+                    'imageUrl VARCHAR(250) ' +
+                    ')'
+                    )
 
     #Dining session table (per event)
     cursor.execute('CREATE TABLE IF NOT EXISTS DiningSessions (' +
                     'id INT AUTO_INCREMENT PRIMARY KEY, ' +
-                    'eventId INT NOT NULL' +
+                    'eventId INT NOT NULL,' +
                     'FOREIGN KEY (eventId) REFERENCES Events(id) ON DELETE CASCADE' +
                     ')')
 
     #Table to track those coming to dining session
     cursor.execute('CREATE TABLE IF NOT EXISTS DiningMembers (' +
-                    'id INT AUTO_INCREMENT PRIMARY KEY, ' +
+                    'eventId INT NOT NULL,' +
                     'username VARCHAR(50) NOT NULL,' +
                     'PRIMARY KEY (eventId, username), ' +
-                    'FOREIGN KEY (eventIs) REFERENCES Events(id) ON DELETE CASCADE, '+
+                    'FOREIGN KEY (eventId) REFERENCES Events(id) ON DELETE CASCADE, '+
                     'FOREIGN KEY (username) REFERENCES Users(username) ON DELETE CASCADE' +
                     ')')
     
@@ -158,6 +173,12 @@ def createEventTables():
     conn = getConnection()
     cursor = conn.cursor()
 
+    #Org table
+    cursor.execute('CREATE TABLE IF NOT EXISTS Organizations (' +
+                    'id INT AUTO_INCREMENT PRIMARY KEY, ' +
+                    'orgName VARCHAR(50) NOT NULL UNIQUE ' +
+                    ')')
+
     #Main event table
     cursor.execute('CREATE TABLE IF NOT EXISTS Events (' +
                     'id INT AUTO_INCREMENT PRIMARY KEY, ' +
@@ -167,12 +188,13 @@ def createEventTables():
                     'startTime TIME NOT NULL, ' +
                     'endTime TIME NOT NULL, ' +
                     'description TEXT, ' +
-                    'eventType, ' +
-                    'eventStatus, ' +
-                    'organizationName, ' +
+                    'eventType VARCHAR(50) NOT NULL, ' +
+                    'eventStatus VARCHAR(25) NOT NULL, ' +
+                    'orgName VARCHAR(50) NOT NULL, ' +
                     'createdBy VARCHAR(50) NOT NULL, ' +
                     'isDiningEvent BOOLEAN DEFAULT FALSE, ' +   #should chicken tinder be included 
-                    'FOREIGN KEY(createdBy) REFERENCES Users(username) ON DELETE CASCADE ' +
+                    'FOREIGN KEY(createdBy) REFERENCES Users(username) ON DELETE CASCADE , ' +
+                    'FOREIGN KEY(orgName) REFERENCES Organizations(orgName) ON DELETE CASCADE ' +
                     ')')
 
     #Event members table
@@ -184,43 +206,72 @@ def createEventTables():
                     'FOREIGN KEY (username) REFERENCES Users(username) ON DELETE CASCADE ' +
                     ')')
 
-    #Org table
-    cursor.execute('CREATE TABLE IF NOT EXISTS Organizations (' +
-                    'id INT AUTO_INCREMENT PRIMARY KEY, ' +
-                    'orgName VARCHAR(100) NOT NULL ' +
-                    ')')
-
     #Org members table
     cursor.execute('CREATE TABLE IF NOT EXISTS OrgMembers (' +
                     'id INT AUTO_INCREMENT PRIMARY KEY, ' +
                     'orgId INT NOT NULL, ' +
                     'username VARCHAR(50) NOT NULL, ' +
                     'FOREIGN KEY (orgId) REFERENCES Organizations(id) ON DELETE CASCADE, ' +
-                    'FOREIGN KEY (username) REFERENCES Users(username) ON DELET CASCADE ' +
+                    'FOREIGN KEY (username) REFERENCES Users(username) ON DELETE CASCADE ' +
                     ')')
 
     conn.commit()
     cursor.close()
     conn.close()
 
-def createEvent():
+def createEvent(eventName, location, eventDate, startTime, endTime, description, eventType, eventStatus, orgName, createdBy, isDiningEvent, eventId, username, orgId):
     conn = getConnection()
     cursor = conn.cursor()
 
     cursor.execute("""
-            INSERT INTO Events()()""")
+            INSERT INTO Events(eventName, location, eventDate, startTime, endTime, description, eventType, eventStatus, orgName, createdBy, isDiningEvent)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+            (eventName, location, eventDate, startTime, endTime, description, eventType, eventStatus, orgName, createdBy, isDiningEvent ))
+
+    cursor.execute("""
+            INSERT INTO EventMembers(eventId, username)
+            VALUES (%s, %s)""",
+            (eventId, username))
+
+    cursor.execute("""
+            INSERT INTO Organizations(orgName)
+            VALUES (%s)""",
+            (orgName,))  
+
+    cursor.execute("""  
+            INSERT INTO OrgMembers(orgId, username)
+            VALUES (%s, %s)""",
+            (orgId, username))  
 
     conn.commit()
     cursor.close()
     conn.close()
 
 
-def createDining():
+def createDining(id, name, imageUrl, eventId, username, restaurantId, vote):
     conn = getConnection()
     cursor = conn.cursor()
 
     cursor.execute("""
-            INSERT INTO Restaurants()()""")
+            INSERT INTO Restaurants(id,name, imageUrl) 
+            VALUES (%s, %s, %s)""", 
+            (id,name, imageUrl))
+
+    cursor.execute("""
+            INSERT INTO DiningSessions(eventId)
+            VALUES (%s)""",
+            (eventId,))
+
+    cursor.execute("""
+            INSERT INTO DiningMembers(eventId,username)
+            VALUES (%s, %s)""",
+            (eventId, username))
+
+    cursor.execute("""
+            INSERT INTO DiningVotes(eventId, username, restaurantId, vote)
+            VALUEs (%s, %s, %s, %s)""",
+            (eventId, username, restaurantId, vote))
+
 
     conn.commit()
     cursor.close()
@@ -229,9 +280,10 @@ def createDining():
 
 def startDB():
     testConnectDB() #try see if successful
-    createTables()
-    createDiningTables()
+    createUsersTables()
     createEventTables()
+    createDiningTables()
+   
 
 if __name__ == '__main__':
     ans = input("Drop tables? y/n: ").lower()
