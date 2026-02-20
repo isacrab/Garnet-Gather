@@ -235,12 +235,12 @@ def createEvent(eventName, location, eventDate, startTime, endTime, description,
 
     cursor.execute("""
             INSERT INTO Organizations(orgName)
-            VALUES (%s, %s)""",
+            VALUES (%s)""",
             (orgName,))  
 
     cursor.execute("""  
             INSERT INTO OrgMembers(orgId, username)
-            VALUES (%s, %s, %s)""",
+            VALUES (%s, %s)""",
             (orgId, username))  
 
     conn.commit()
@@ -281,8 +281,9 @@ def createDining(id, name, imageUrl, eventId, username, restaurantId, vote):
 def startDB():
     testConnectDB() #try see if successful
     createUsersTables()
-    createDiningTables()
     createEventTables()
+    createDiningTables()
+   
 
 if __name__ == '__main__':
     ans = input("Drop tables? y/n: ").lower()
