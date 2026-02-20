@@ -58,11 +58,9 @@ def recordVote(eventId, username, restaurantId, vote):
     conn = getConnection()
     cursor = conn.cursor()
 
-    #put vote in table
     cursor.execute("""
-            INSERT INTO DiningVotes (eventId, username, restaurantId, vote)
-            VALUES (%s, %s, %s, %s)""",
-            (eventId, username, restaurantId, vote))
+            SELECT 1 FROM DiningVotes WHERE eventId = %s AND username = %s AND restaurantId = %s
+            LIMIT 1""", (eventId, username, restaurantId))
     
     existingVote = cursor.fetchone()
 
@@ -72,9 +70,16 @@ def recordVote(eventId, username, restaurantId, vote):
         conn.closer()
         return False    #dont record vote
 
+    #put vote in table
+    cursor.execute("""
+            INSERT INTO DiningVotes (eventId, username, restaurantId, vote)
+            VALUES (%s, %s, %s, %s)""",
+            (eventId, username, restaurantId, vote))
+
     conn.commit()   #commit changes to db
     cursor.close()
     conn.close()
+    return True
 
 def getResults(eventId):
 #get all votes, rank by number of "yes"s
