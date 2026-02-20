@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chicken Tinder</title>
+</head>
+
+<body>
+    <h2>Chicken Tinder Testing</h2>
+    <div id="restaurantSection"></div>
+    <div id="resultsSection"></div>
+
+    <script>
+            const EVENT_ID = 1;         //this is for testing
+            let restaurants = []
+            let currentIndex = 0;
+
+            //auto load restaurants
+            window.onload = async function(){
+                const response = await fetch(`/api/chicken-tinder/${EVENT_ID}/restaurants`);
+                const data = await response.json();
+                restaurants = data.restaurants;
+                currentIndex = 0;
+                displayRestaurant();
+            }
+
+            function displayRestaurant(){
+                if(currentIndex >= restaurants.length){
+                    showResults();
+                    return;
+                }
+
+                const restaurant = restaurants[currentIndex];
+                document.getElementById('restaurantSection').innerHTML = `
+                    <h3>${restaurant[1]}</h3>
+                    <p>Restaurant ${currentIndex + 1} of ${restaurants.length}</p>
+                    <button onclick="vote(false)">No</button>
+                    <button onclick="vote(true)">Yes</button>
+                `;
+            } 
+
+            async function vote(isYes){
+                const restaurant = restaurants[currentIndex];
+
+                await fetch('/api/chicken-tinder/vote', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        eventId: EVENT_ID,
+                        restaurantId: restaurant[0],
+                        vote: isYes
+                    })
+                });
+                
+                currentIndex++;
+                displayRestaurant();
+            }
+
+            async function showResults(){
+                document.getElementById('restaurantSection').innerHTML = '<h3>Voting Complete!</h3>';
+
+                const response = await fetch(`/api/chicken-tinder/${EVENT_ID}/results`);
+                const data = await response.json();
+
+                let html = '<h3>Results</h3>';
+                data.results.forEach((result, index) => {
+                    html += `<p>${index + 1}. ${result.name} - ${result.yesVotes} votes</p>`;
+                });
+                document.getElementById('resultsSection').innerHTML = html;
+            }
+
+    </script>
+
+    <p><a href = "/">Home</a></p>
+</body>
+</html>
