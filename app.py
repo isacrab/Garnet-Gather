@@ -36,6 +36,14 @@ def userSignup():
 def chickenTinder():
     return render_template('ChickenTinder.html')
 
+@app.route('/chickenTinderStart', methods = ['POST'])
+def chickenTinderStart():
+    username = request.form['username'].strip()
+    event_id = int(request.form['event_id'])
+
+    session['username'] = username
+    return redirect(url_for('chickenTinder', event_id=event_id))
+
 
 if __name__=='__main__':    #main
     app.run(debug=True)
