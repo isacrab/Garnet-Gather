@@ -1,6 +1,8 @@
 #all things to make the app actually run
 from flask import Flask,render_template, request,redirect, url_for
 from db import *
+from chicken_tinder import recordVote, getRemainingRestaurants, getResults
+
 app = Flask(__name__)
 
 @app.route('/') #home page for now
@@ -30,7 +32,9 @@ def userSignup():
     
     return redirect(url_for('login'))
             
-
+@app.route('/chicken-tinder')
+def chickenTinder():
+    return render_template('ChickenTinder.html')
 
 
 if __name__=='__main__':    #main
