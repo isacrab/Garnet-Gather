@@ -1,76 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Chicken Tinder</title>
+  <meta charset="UTF-8" />
+  <title>Chicken Tinder</title>
 </head>
-
 <body>
-    <h2>Chicken Tinder Testing</h2>
-    <div id="restaurantSection"></div>
-    <div id="resultsSection"></div>
+  <h2>Chicken Tinder</h2>
 
-    <script>
-            const EVENT_ID = 1;         //this is for testing
-            let restaurants = []
-            let currentIndex = 0;
+  <!-- Start form (no JS): sets event + username then redirects to /chicken-tinder/<event_id> -->
+  <form action="{{ url_for('chickenTinderStart') }}" method="POST">
+    <label for="event_id">Event ID:</label><br>
+    <input type="number" name="event_id" required><br><br>
 
-            //auto load restaurants
-            window.onload = async function(){
-                const response = await fetch(`/api/chicken-tinder/${EVENT_ID}/restaurants`);
-                const data = await response.json();
-                restaurants = data.restaurants;
-                currentIndex = 0;
-                displayRestaurant();
-            }
+    <label for="username">Username (FSUID):</label><br>
+    <input type="text" name="username" required><br><br>
 
-            function displayRestaurant(){
-                if(currentIndex >= restaurants.length){
-                    showResults();
-                    return;
-                }
+    <input type="submit" value="Start Voting">
+  </form>
 
-                const restaurant = restaurants[currentIndex];
-                document.getElementById('restaurantSection').innerHTML = `
-                    <h3>${restaurant[1]}</h3>
-                    <p>Restaurant ${currentIndex + 1} of ${restaurants.length}</p>
-                    <button onclick="vote(false)">No</button>
-                    <button onclick="vote(true)">Yes</button>
-                `;
-            } 
+  <hr>
 
-            async function vote(isYes){
-                const restaurant = restaurants[currentIndex];
+  {% if done is defined %}
+    {% if not done %}
+      <h3>{{ restaurant.name }}</h3>
 
-                await fetch('/api/chicken-tinder/vote', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        eventId: EVENT_ID,
-                        restaurantId: restaurant[0],
-                        vote: isYes
-                    })
-                });
-                
-                currentIndex++;
-                displayRestaurant();
-            }
+      {% if restaurant.imageUrl %}
+        <img src="{{ restaurant.imageUrl }}" alt="{{ restaurant.name }}" style="max-width: 320px;">
+      {% endif %}
 
-            async function showResults(){
-                document.getElementById('restaurantSection').innerHTML = '<h3>Voting Complete!</h3>';
+      <p>Restaurants left to vote on: {{ remaining_count }}</p>
 
-                const response = await fetch(`/api/chicken-tinder/${EVENT_ID}/results`);
-                const data = await response.json();
+      <form method="POST" action="{{ url_for('chickenTinderVote', event_id=event_id) }}">
+        <input type="hidden" name="restaurant_id" value="{{ restaurant.id }}">
+        <button type="submit" name="vote" value="0">No</button>
+        <button type="submit" name="vote" value="1">Yes</button>
+      </form>
 
-                let html = '<h3>Results</h3>';
-                data.results.forEach((result, index) => {
-                    html += `<p>${index + 1}. ${result.name} - ${result.yesVotes} votes</p>`;
-                });
-                document.getElementById('resultsSection').innerHTML = html;
-            }
+    {% else %}
+      <h3>Voting Complete!</h3>
 
-    </script>
+      <h3>Results</h3>
+      {% for row in results %}
+        <p>{{ loop.index }}. {{ row[1] }} - {{ row[3] }} votes</p>
+      {% endfor %}
+    {% endif %}
+  {% else %}
+    <p>Enter an Event ID and your username, then click Start Voting.</p>
+  {% endif %}
 
-    <p><a href = "/">Home</a></p>
+  <p><a href="{{ url_for('homepage') }}">Home</a></p>
 </body>
 </html>
