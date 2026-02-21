@@ -276,6 +276,42 @@ def createDining(id, name, imageUrl, eventId, username, restaurantId, vote):
     conn.commit()
     cursor.close()
     conn.close()
+
+def seedRestaurants():
+    conn = getConnection()
+    cursor = conn.cursor()
+    restaurant = [
+        (1, 'Chick-Fil-A', TBD)
+        (2, '4 Rivers', TBD)
+        (3, 'Panera Bread', TBD)
+        (4, 'Panda Express', TBD)
+        (5, 'Proof', TBD)
+        (6, 'Suwannee', TBD)
+        (7, 'Seminaloe Cafe', TBD)
+        (8, 'Argo Tea', TBD)
+        (9, 'Bento Sushi', TBD)
+        (10, 'Brookly Pizza', TBD)
+        (11, 'The Den', TBD)
+        (12, 'Einstein Bros. Bagels', TBD)
+        (13, 'Pollo Tropical', TBD)
+        (14, 'Starbucks (Dirac)', TBD)
+        (15, 'Starbucks (Stroz)', TBD)
+        (16, 'Starbucks (Union)', TBD)
+        (17, 'Starbucks (1851)', TBD)
+        (18, 'Halal Shack', TBD)
+        (19, 'Subway', TBD)
+        (20, 'Tally-Mac-Shack', TBD)
+        (21, 'Three Torches', TBD)
+        (22, 'Joe Mama\'s', TBD)
+        (23, 'Vato Tacos', TBD)
+        (24, 'Shake Smart', TBD)
+        ]
+    cursor.executemany("""
+            INSERT INTO Restaurants(id, name, imageUrl) 
+            VALUES (%s, %s, %s)""", restaurant)
+    conn.commit()
+    cursor.close()
+    conn.close()
     
 
 def startDB():
@@ -283,6 +319,7 @@ def startDB():
     createUsersTables()
     createEventTables()
     createDiningTables()
+    seedRestaurants()
    
 
 if __name__ == '__main__':
