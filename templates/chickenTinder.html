@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chicken Tinder</title>
+</head>
+<body>
+  <h2>Chicken Tinder</h2>
+
+  <!-- Start form (no JS): sets event + username then redirects to /chicken-tinder/<event_id> -->
+  <form action="{{ url_for('chickenTinderStart') }}" method="POST">
+    <label for="event_id">Event ID:</label><br>
+    <input type="number" name="event_id" required><br><br>
+
+    <label for="username">Username (FSUID):</label><br>
+    <input type="text" name="username" required><br><br>
+
+    <input type="submit" value="Start Voting">
+  </form>
+
+  <hr>
+
+  {% if done is defined %}
+    {% if not done %}
+      <h3>{{ restaurant.name }}</h3>
+
+      {% if restaurant.imageUrl %}
+        <img src="{{ restaurant.imageUrl }}" alt="{{ restaurant.name }}" style="max-width: 320px;">
+      {% endif %}
+
+      <p>Restaurants left to vote on: {{ remaining_count }}</p>
+
+      <form method="POST" action="{{ url_for('chickenTinderVote', event_id=event_id) }}">
+        <input type="hidden" name="restaurant_id" value="{{ restaurant.id }}">
+        <button type="submit" name="vote" value="0">No</button>
+        <button type="submit" name="vote" value="1">Yes</button>
+      </form>
+
+    {% else %}
+      <h3>Voting Complete!</h3>
+
+      <h3>Results</h3>
+      {% for row in results %}
+        <p>{{ loop.index }}. {{ row[1] }} - {{ row[3] }} votes</p>
+      {% endfor %}
+    {% endif %}
+  {% else %}
+    <p>Enter an Event ID and your username, then click Start Voting.</p>
+  {% endif %}
+
+  <p><a href="{{ url_for('homepage') }}">Home</a></p>
+</body>
+</html>
