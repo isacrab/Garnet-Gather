@@ -1,53 +1,126 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang = "en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset = "UTF-8">
   <title>Chicken Tinder</title>
+  <style>
+    .hidden{
+      display: none;
+    }
+  </style>
 </head>
 <body>
-  <h2>Chicken Tinder</h2>
+  <h1>Chicken Tinder</h1>
+  <!--setup-->
+  <div id = "setup">
+    <h3>Start Voting</h3>
+    <!--since events is not yet setup testing w/ inputs (REMOVE LATER)-->
+    <label>Username:</label>
+    <input type = "text" id = "username" value = "testuser"><br><br>
 
-  <!-- Start form (no JS): sets event + username then redirects to /chicken-tinder/<event_id> -->
-  <form action="{{ url_for('chickenTinderStart') }}" method="POST">
-    <label for="event_id">Event ID:</label><br>
-    <input type="number" name="event_id" required><br><br>
+    <label>Event Id:</label>
+    <input type = "number" id = "eventId" value = "1"><br><br>
 
-    <label for="username">Username (FSUID):</label><br>
-    <input type="text" name="username" required><br><br>
+    <!--start button!!!-->
+    <button onclick = "startVoting()">Start</button>
+  </div>
 
-    <input type="submit" value="Start Voting">
-  </form>
+  <!--Voting sectuion-->
+  <div id = "votingSection" class = "hidden">
+    <h2 id = "restaurantName"></h2>
+    <!--Votes! yes and no assign to 1 and 0-->
+    <button onclick = "vote(0)">No</button>
+    <button onclick = "vote(1)">Yes</button>
+  </div>
 
-  <hr>
+  <!--Display results-->
+  <div id = "resultsSection" class = "hidden">
+    <h2>Voting Completed</h2>
+    <div id = "resultsList"></div>
+  </div>
 
-  {% if done is defined %}
-    {% if not done %}
-      <h3>{{ restaurant.name }}</h3>
+  <!--JS script for functionality!!-->
+  <script>
+    //store global vars (these r for testing!!!!)
+    let currentUsername = '';
+    let currentEventId = 1;
+    let currentRestaurant = null;
 
-      {% if restaurant.imageUrl %}
-        <img src="{{ restaurant.imageUrl }}" alt="{{ restaurant.name }}" style="max-width: 320px;">
-      {% endif %}
+    //start the voting by setting up stuff
+    function startVoting(){
+      //grab info from input
+      currentUsername = document.getElementById('username').value;
+      //grab info but parse it to make it actually an int
+      currentEventId = parseInt(document.getElementById('eventId').value);
+      
+      //hide the setup and show voting
+      document.getElementById('setup').classList.add('hidden');
+      document.getElementById('votingSection').classList.remove('hidden');
 
-      <p>Restaurants left to vote on: {{ remaining_count }}</p>
+      loadNextRestaurant();
+    }
 
-      <form method="POST" action="{{ url_for('chickenTinderVote', event_id=event_id) }}">
-        <input type="hidden" name="restaurant_id" value="{{ restaurant.id }}">
-        <button type="submit" name="vote" value="0">No</button>
-        <button type="submit" name="vote" value="1">Yes</button>
-      </form>
+    //load the next rest to be voted on 
+    function loadNextRestaurant(){
+      //call api w/ params
+      fetch(`/api/chickenTinder/nextRest?username=${currentUsername}&eventId=${currentEventId}`)
 
-    {% else %}
-      <h3>Voting Complete!</h3>
+      //convert to JSON & process
+        .then(response => response.json())
+        .then(data => {
+          if(data.done){
+            showResults(data.results);    //if all have been voted on show results
+          } 
+          else{   //if not show restaurant
+            currentRestaurant = data.restaurant;
+            displayRestaurant(data.restaurant);
+          }
+        })
+    }
 
-      <h3>Results</h3>
-      {% for row in results %}
-        <p>{{ loop.index }}. {{ row[1] }} - {{ row[3] }} votes</p>
-      {% endfor %}
-    {% endif %}
-  {% else %}
-    <p>Enter an Event ID and your username, then click Start Voting.</p>
-  {% endif %}
+    //display rest names
+    function displayRestaurant(restaurant){
+      //textContext sets elements text!! 
+      document.getElementById('restaurantName').textContent = restaurant.name;
+    }
 
-  <p><a href="{{ url_for('homepage') }}">Home</a></p>
+    //submit the vote!
+    function vote(voteVal){
+      fetch('/api/chickenTinder/vote', { method: 'POST', 
+        //have to tell api json being sent
+        headers: {'Content-Type': 'application/json'},
+        //turn vote into package
+        body: JSON.stringify({
+          username: currentUsername,
+          eventId: currentEventId,
+          restaurantId: currentRestaurant.id,
+          vote: voteVal
+        })
+
+      })
+      //convert to json and process
+      .then(response => response.json())
+      .then(data => {
+        if(data.success){
+            loadNextRestaurant(); 
+        } 
+      })
+    }
+
+    //show final results
+    function showResults(results){
+      //hide voting and show results
+      document.getElementById('votingSection').classList.add('hidden');
+      document.getElementById('resultsSection').classList.remove('hidden');
+
+      //get results
+      const resultsList = document.getElementById('resultsList');
+      results.forEach((restaurant, index) => {
+        const div = document.createElement('div');
+        div.innerHTML = `${index + 1}. ${restaurant.name} - ${restaurant.votes} votes`;
+        resultsList.appendChild(div);
+      });
+    }
+  </script>
 </body>
 </html>
