@@ -276,6 +276,74 @@ def createDining(id, name, imageUrl, eventId, username, restaurantId, vote):
     conn.commit()
     cursor.close()
     conn.close()
+
+#hardcode restaurants
+def seedRestaurants():
+    conn = getConnection()
+    cursor = conn.cursor()
+    restaurant = [
+        #urls will be added later or replaced w/ smth else
+        (1, 'Chick-Fil-A', None),
+        (2, '4 Rivers', None),
+        (3, 'Panera Bread', None),
+        (4, 'Panda Express', None),
+        (5, 'Proof', None),
+        (6, 'Suwannee', None),
+        (7, 'Seminole Cafe', None),
+        (8, 'Argo Tea', None),
+        (9, 'Bento Sushi', None),
+        (10, 'Brooklyn Pizza', None),
+        (11, 'The Den', None),
+        (12, 'Einstein Bros. Bagels', None),
+        (13, 'Pollo Tropical', None),
+        (14, 'Starbucks (Dirac)', None),
+        (15, 'Starbucks (Stroz)', None),
+        (16, 'Starbucks (Union)', None),
+        (17, 'Starbucks (1851)', None),
+        (18, 'Halal Shack', None),
+        (19, 'Subway', None),
+        (20, 'Tally-Mac-Shack', None),
+        (21, 'Three Torches', None),
+        (22, 'Joe Mama\'s', None),
+        (23, 'Vato Tacos', None),
+        (24, 'Shake Smart', None)
+        ]
+    cursor.executemany("""
+            INSERT IGNORE INTO Restaurants(id, name, imageUrl) 
+            VALUES (%s, %s, %s)""", restaurant)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
+#THIS IS SO KAY CAN TEST CHICKEN TINDER REMOVE LATER
+def seedTestEvent():
+    conn = getConnection()
+    cursor = conn.cursor()
+    
+    #create test org
+    cursor.execute("""
+        INSERT IGNORE INTO Organizations (id, orgName) 
+        VALUES (1, 'Test Organization')
+    """)
+    
+    #create test user
+    cursor.execute("""
+        INSERT IGNORE INTO Users (username, passwordHash, email, firstName, lastName, role)
+        VALUES ('testuser', 'testpass', 'test@fsu.edu', 'Test', 'User', 'Student')
+    """)
+    
+    #create test event
+    cursor.execute("""
+        INSERT IGNORE INTO Events (id, eventName, location, eventDate, startTime, endTime, 
+                                   description, eventType, eventStatus, orgName, createdBy, isDiningEvent)
+        VALUES (1, 'Test Dining Event', 'Student Union', '2026-03-01', '12:00:00', '13:00:00',
+                'Test event for chicken tinder', 'Dining', 'Active', 'Test Organization', 'testuser', TRUE)
+    """)
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
     
 
 def startDB():
@@ -283,14 +351,24 @@ def startDB():
     createUsersTables()
     createEventTables()
     createDiningTables()
+    seedRestaurants()
+    seedTestEvent()
    
 
 if __name__ == '__main__':
     ans = input("Drop tables? y/n: ").lower()
     if ans == 'y':
         dropTables()
+    ans = input("Clear votes? y/n: ").lower()
+    if ans == 'y':
+        conn = getConnection()
+        cursor = conn.cursor()
+
+        cursor.execute("DELETE FROM DiningVotes WHERE username = 'testuser'")
+
+        conn.commit()
+        cursor.close()
+        conn.close()
 
     startDB()
-
-
 
