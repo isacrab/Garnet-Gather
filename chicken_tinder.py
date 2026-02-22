@@ -67,7 +67,7 @@ def recordVote(eventId, username, restaurantId, vote):
     if existingVote:
         #user already voted
         cursor.close()
-        conn.closer()
+        conn.close()
         return False    #dont record vote
 
     #put vote in table
