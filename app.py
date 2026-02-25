@@ -1,7 +1,6 @@
 #all things to make the app actually run
 from flask import Flask,render_template, request,redirect, url_for, jsonify
 from db import *
-from authen import *
 from chicken_tinder import recordVote, getRemainingRestaurants, getResults
 
 app = Flask(__name__)
