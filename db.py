@@ -97,7 +97,7 @@ def createScheduleTable():
     cursor.close()
     conn.close()
     
-#creates users, default param at end to determine what role it is
+'''#creates users, default param at end to determine what role it is
 def createUser(username,password,email,fname,lname,role=0):
     if role!=0:
         print("user is an rso admin") #RBAC TODO: assign roles
@@ -112,7 +112,7 @@ def createUser(username,password,email,fname,lname,role=0):
     
     conn.commit()
     cursor.close()
-    conn.close()
+    conn.close()'''
 
 def createSchedules(username,classname,dayofweek,starttime,endtime):
     conn = getConnection()
