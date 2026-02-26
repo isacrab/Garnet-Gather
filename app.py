@@ -1,10 +1,11 @@
 #all things to make the app actually run
-from flask import Flask,render_template, request,redirect, url_for, jsonify
+from flask import Flask,render_template, request,redirect, url_for, jsonify,flash
 from db import *
 from authen import *
 from chicken_tinder import recordVote, getRemainingRestaurants, getResults
 
 app = Flask(__name__)
+app.secret_key ="23adkfn23rfnjfa98" 
 
 @app.route('/') #home page for now
 def homepage():
@@ -27,6 +28,11 @@ def userSignup():
         fName = request.form['firstname']
         lName = request.form['lastname']
     
+        if not realEmail(email):    #check if email is valid
+            print("invalid email")
+            flash("Please enter a valid @fsu.edu email address.")
+            return render_template('signup.html')
+
     createUser(fsuid,password,email,fName,lName)    #actually creates user                               
 
 
