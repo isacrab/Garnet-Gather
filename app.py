@@ -30,7 +30,13 @@ def userSignup():
     
         if not realEmail(email):    #check if email is valid
             print("invalid email")
-            flash("Please enter a valid @fsu.edu email address.")
+            flash("Please enter a valid @fsu.edu email address.", "emailerror")
+            return render_template('signup.html')
+
+    
+        if not validPassword(password):
+            print("invalid password")
+            flash("Please enter a valid password (8-25 characters, with at least one number and one uppercase letter).", "passworderror")
             return render_template('signup.html')
 
     createUser(fsuid,password,email,fName,lName)    #actually creates user                               
