@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ username }}'s Schedule</title>
+</head>
+<body>
+    <h1>Schedule for {{ username }}</h1>
+
+    {% if schedules %}
+    <table border="1">
+        <tr>
+            <th>Event</th>
+            <th>Day</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+        </tr>
+        {% for event, day, start, end in schedules %}
+        <tr>
+            <td>{{ event }}</td>
+            <td>{{ day }}</td>
+            <td>{{ start }}</td>
+            <td>{{ end }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>No schedule found for this user.</p>
+    {% endif %}
+
+    <a href="/Schedule">Back to Schedule Input</a>
+</body>
+</html>

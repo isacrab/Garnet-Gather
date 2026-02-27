@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Schedule Input</title>
+</head>
+<body>
+
+    <h1>Input your Schedule</h1>
+
+    <form method="POST" action="/scheduleSubmit">
+
+        <label>Username:</label>
+        <input type="text" name="username" required>
+
+        <br><br>
+
+        <label>How many events?</label>
+        <input type="number" id="numRows" min="1" oninput="createTable()">
+
+        <div id="tableContainer"></div>
+
+        <br>
+        <button type="submit">Save Schedule</button>
+    </form>
+
+    <h2>Input your Username to view Schedule</h2>
+
+    <form method="GET" action="/viewSchedule">
+
+        <label>Username:</label>
+        <input type="text" name="username" required>
+        <button type="submit">View Schedule</button>
+    </form>
+
+    <script>
+        //used chat for these, but can try to figure different way to do it?
+        function createTable() {
+            const n = parseInt(document.getElementById("numRows").value);
+            const container = document.getElementById("tableContainer");
+            container.innerHTML = "";
+
+            if (!n || n <= 0) return;
+
+            let table = document.createElement("table");
+
+            let header = document.createElement("tr");
+            ["Event", "Day", "Start", "End"].forEach(text => {
+                let th = document.createElement("th");
+                th.textContent = text;
+                header.appendChild(th);
+            });
+            table.appendChild(header);
+
+            for (let i = 0; i < n; i++) {
+                let row = document.createElement("tr");
+
+                row.innerHTML = `
+                            <td><input type="text" name="event[]" required></td>
+                            <td>
+                                <select name="dayofweek[]">
+                                    <option>Mon</option>
+                                    <option>Tue</option>
+                                    <option>Wed</option>
+                                    <option>Thu</option>
+                                    <option>Fri</option>
+                                </select>
+                            </td>
+                <td><input type="time" name="startTime[]"required></td>
+                <td><input type="time" name="endTime[]"required></td>
+
+                        `;
+
+                table.appendChild(row);
+            }
+
+            container.appendChild(table);
+        }</script>
+
+
+    <a href='/'>
+        <button>Go back to Home</button>
+    </a>
+
+
+</body>
+</html>
