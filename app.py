@@ -28,7 +28,7 @@ def userSignup():
     
     createUser(fsuid,password,email,fName,lName)    #actually creates user                               
 
-
+     
     
     return redirect(url_for('login'))
             
