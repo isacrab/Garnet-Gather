@@ -124,7 +124,7 @@ def createSchedules(username,classname,dayofweek,starttime,endtime):
     conn.commit()
     cursor.close()
     conn.close()
-
+     
 #chicken tinder 
 def createDiningTables():
     conn = getConnection()

@@ -28,10 +28,44 @@ def userSignup():
     
     createUser(fsuid,password,email,fName,lName)    #actually creates user                               
 
-     
+
     
     return redirect(url_for('login'))
-            
+
+@app.route('/schedule_insert')
+def schedulepage():
+        return render_template('schedule_insert.html')
+
+@app.route('/scheduleSubmit', methods = ['POST'])  #handles schedule submission, gets info from form and puts it in db, then redirects to schedule page to show it off')
+def scheduleSubmit():
+    username = request.form['username']
+    event = request.form.getlist('event[]')
+    day = request.form.getlist('dayofweek[]')
+    start = request.form.getlist('startTime[]')
+    end = request.form.getlist('endTime[]')
+    
+    for i in range(len(event)):
+        createSchedules(username, event[i], day[i], start[i], end[i])    #create schedule for each event submitted
+    return render_template('schedule_insert.html')
+
+@app.route('/viewSchedule') 
+def viewSchedule():
+    username = request.args.get('username')
+    conn = getConnection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT event, dayofweek, startTime, endTime
+        FROM Schedules
+        WHERE username = %s
+        ORDER BY dayofweek, startTime
+    """, (username,))
+    schedules = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    return render_template('view_schedule.html', username=username, schedules=schedules)
+
+
 #chicken tinder routes 
 #THESE ARE COMMENTED OUT BC WE DONT HAVE EVENTS SET UP SO TESTING ROUTE IN IN USE
 #@app.route('/chicken-tinder')
