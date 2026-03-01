@@ -6,7 +6,7 @@ from chicken_tinder import recordVote, getRemainingRestaurants, getResults
 
 app = Flask(__name__)
 
-@app.route('/') #home page for now
+@app.route('/') #home page for now, will change to login
 def homepage():
     return render_template('home.html')
 
@@ -14,11 +14,12 @@ def homepage():
 def login():
     return render_template('login.html')
 
-@app.route('/signup')       #only renders the signup page, links to userSignup that does all the actual work in db
+@app.route('/signup')       #only renders the signup page, links to /userSignup that does all the actual work in db
 def singup():
     return render_template('signup.html')
 
-@app.route('/userSignup', methods = ['POST', 'GET'])  #will actually put it in db
+#THIS IS FOR USERS ONLY
+@app.route('/userSignup', methods = ['POST', 'GET'])  #will actually put it in db, links to @app.route('/signup')
 def userSignup():
     if request.method == 'POST':    #get all info to insert into table
         fsuid = request.form['username']
@@ -27,11 +28,33 @@ def userSignup():
         fName = request.form['firstname']
         lName = request.form['lastname']
     
-    createUser(fsuid,password,email,fName,lName)    #actually creates user                               
+    createUser(fsuid,password,email,fName,lName, 0)    #actually creates user, in db.py                              
 
+    return redirect(url_for('login'))
 
+#ONE FOR THE RSOS ONLY
+@app.route('/rsoSignup')
+def rsoSignup():
+    return render_template('rsoSignup.html')    #links with orgSignup
+
+@app.route('/orgSignup', methods = ['POST', 'GET']) #for orgSignup, gets everything and makes RSO
+def orgSignup():
+    if request.method == 'POST':
+        fsuid = request.form['username']
+        password = request.form['password']
+        email = request.form['email']
+        fName = request.form['firstname']
+        #lastname is being nulled out
+        code = int(request.form['adminCode'])
+    
+        if(code==8008135):
+            createUser(fsuid,password,email,fName, 0, code)    #actually creates user, in db.py 
+        else:
+            print("Error in creating an admin user")
     
     return redirect(url_for('login'))
+
+
             
 #chicken tinder routes 
 #THESE ARE COMMENTED OUT BC WE DONT HAVE EVENTS SET UP SO TESTING ROUTE IN IN USE

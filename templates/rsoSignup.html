@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Account</title>
+</head>
+<body>
+
+    <h2>Please enter your RSO information here</h2>
+
+    <form action="{{ url_for('orgSignup') }}" method = "POST">
+        <label for="username">Username:</label><br>
+        <input type="text" name="username"><br><br>
+
+        <label for="password">Password:</label><br>
+        <input type="password" name="password"><br><br>
+
+        <label for="email">RSO Email:</label><br>
+        <input type="email" name="email"><br><br>
+
+        <label for="firstname">Organization Name:</label><br>
+        <input type="text" name="firstname"><br><br>
+
+        <label for="adminCode">Code:</label><br>
+        <input type="number" name="adminCode"><br><br>
+
+        <input type="submit" value="submit">
+    </form>
+
+    <h4> <a href="/login">Back to login</a></h4>
+
+</body>
+</html>

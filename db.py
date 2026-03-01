@@ -67,7 +67,7 @@ def createUsersTables():
                    'passwordHash VARCHAR(250) NOT NULL,' + 
                    'email VARCHAR(100) UNIQUE NOT NULL,' + 
                    'firstName VARCHAR(50) NOT NULL,' +
-                   'lastName VARCHAR(50) NOT NULL,' +
+                   'lastName VARCHAR(50),' +         #can be null for RSO's
                    'role VARCHAR(20) NOT NULL DEFAULT \'Student\' '+
                    ')'
                    )
@@ -97,22 +97,40 @@ def createScheduleTable():
     cursor.close()
     conn.close()
     
-'''#creates users, default param at end to determine what role it is
-def createUser(username,password,email,fname,lname,role=0):
-    if role!=0:
-        print("user is an rso admin") #RBAC TODO: assign roles
-    
-    conn = getConnection()
-    cursor = conn.cursor()
+#creates users, default param at end to determine what role it is
+def createUser(username,password,email,fname,lname, role):
+    try:
+        conn = getConnection()
+        cursor = conn.cursor()
 
-    cursor.execute("""
-            INSERT INTO Users (username, passwordHash, email, firstName, lastName, role)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (username, password, email, fname, lname, role))       #works, checked with print statements
-    
-    conn.commit()
-    cursor.close()
-    conn.close()'''
+        if(role==8008135):    #role is admin
+            print("Admin rights allowed")
+            cursor.execute("""
+                INSERT INTO Users (username, passwordHash, email, firstName, lastName, role)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (username, password, email, fname, None, 'Admin'))       #works, checked with print statements
+        
+        else:       #STUDENT, works as normal
+            print("Student rights defaulted to")
+            cursor.execute("""
+                INSERT INTO Users (username, passwordHash, email, firstName, lastName, role)
+                VALUES (%s, %s, %s, %s, %s, 'Student')
+            """, (username, password, email, fname, lname))
+        
+        #print out everything, delete later
+        cursor.execute("SELECT * FROM Users")
+
+        rows = cursor.fetchall()
+        for r in rows:
+            print(r)
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print("Something went wrong:", e)
+
+
 
 def createSchedules(username,classname,dayofweek,starttime,endtime):
     conn = getConnection()
@@ -233,10 +251,10 @@ def createEvent(eventName, location, eventDate, startTime, endTime, description,
             VALUES (%s, %s)""",
             (eventId, username))
 
-    cursor.execute("""
+    '''cursor.execute("""
             INSERT INTO Organizations(orgName)
             VALUES (%s)""",
-            (orgName,))  
+            (orgName,)) ''' #GOT RID OF BC NOT NEEDED HERE I NEED IT SOMEWHERE ELSE :)
 
     cursor.execute("""  
             INSERT INTO OrgMembers(orgId, username)
