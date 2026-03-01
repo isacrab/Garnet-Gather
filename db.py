@@ -109,6 +109,10 @@ def createUser(username,password,email,fname,lname, role):
                 INSERT INTO Users (username, passwordHash, email, firstName, lastName, role)
                 VALUES (%s, %s, %s, %s, %s, %s)
             """, (username, password, email, fname, None, 'Admin'))       #works, checked with print statements
+
+
+            print("About to test the RSO table:")
+            newRSO(username, email)
         
         else:       #STUDENT, works as normal
             print("Student rights defaulted to")
@@ -130,6 +134,20 @@ def createUser(username,password,email,fname,lname, role):
     except Exception as e:
         print("Something went wrong:", e)
 
+def newRSO(name, email):  #created to insert new RSO into table Organizations, called in createUser()
+    try:
+        conn = getConnection()
+        cursor = conn.cursor()
+
+        cursor.execute("""INSERT INTO Organizations (orgName, email) VALUES (%s,%s)
+                       """, (name, email))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    except Exception as e:
+        print("Something went wrong:", e)
 
 
 def createSchedules(username,classname,dayofweek,starttime,endtime):
@@ -194,7 +212,8 @@ def createEventTables():
     #Org table
     cursor.execute('CREATE TABLE IF NOT EXISTS Organizations (' +
                     'id INT AUTO_INCREMENT PRIMARY KEY, ' +
-                    'orgName VARCHAR(50) NOT NULL UNIQUE ' +
+                    'orgName VARCHAR(50) NOT NULL UNIQUE, ' +
+                    'email VARCHAR(50) NOT NULL UNIQUE ' +  #added
                     ')')
 
     #Main event table
