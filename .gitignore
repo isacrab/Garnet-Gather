@@ -28,3 +28,4 @@ instance/
 *.sln.docstates
 *.env
 *.ini
+/.vs

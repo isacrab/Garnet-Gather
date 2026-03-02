@@ -56,6 +56,9 @@ def dropTables():   #to keep check our bases
     cursor.close()
     conn.close()
 
+
+
+
 def createUsersTables():
     conn = None
     conn = getConnection()
@@ -78,25 +81,6 @@ def createUsersTables():
     cursor.close()
     conn.close()
 
-def createScheduleTable():
-    conn=getConnection()
-    cursor = conn.cursor()
-
-    cursor.execute('CREATE TABLE IF NOT EXISTS Schedules (' 
-                   'id INT AUTO_INCREMENT PRIMARY KEY,'  #the auto makes it to where each new class has a different id
-                   'username VARCHAR(50) NOT NULL, '
-                   'classname VARCHAR(50) NOT NULL, '
-                   'dayofweek ENUM(\'Mon\',\'Tue\',\'Wed\',\'Thu\',\'Fri\') NOT NULL, '
-                   'startTime TIME NOT NULL, '  
-                   'endTime TIME NOT NULL, '
-                   'FOREIGN KEY(username) REFERENCES Users(username) ' 
-                   'ON DELETE CASCADE'
-                   ')'
-                )
-    conn.commit()
-    cursor.close()
-    conn.close()
-    
 #creates users, default param at end to determine what role it is
 def createUser(username,password,email,fname,lname,role=0):
     if role!=0:
@@ -114,13 +98,33 @@ def createUser(username,password,email,fname,lname,role=0):
     cursor.close()
     conn.close()
 
-def createSchedules(username,classname,dayofweek,starttime,endtime):
+
+def createScheduleTable():
+    conn=getConnection()
+    cursor = conn.cursor()
+
+    cursor.execute('CREATE TABLE IF NOT EXISTS Schedules (' 
+                   'id INT AUTO_INCREMENT PRIMARY KEY,'  #the auto makes it to where each new class has a different id
+                   'username VARCHAR(50) NOT NULL, '
+                   'event VARCHAR(50) NOT NULL, '
+                   'dayofweek ENUM(\'Mon\',\'Tue\',\'Wed\',\'Thu\',\'Fri\') NOT NULL, '
+                   'startTime TIME NOT NULL, '  
+                   'endTime TIME NOT NULL, '
+                   'FOREIGN KEY(username) REFERENCES Users(username) ' 
+                   'ON DELETE CASCADE'
+                   ')'
+                )
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def createSchedules(username,event,dayofweek,starttime,endtime):
     conn = getConnection()
     cursor = conn.cursor()
     cursor.execute("""
-            INSERT INTO Schedules (username, classname, dayofweek, starttime, endtime)
+            INSERT INTO Schedules (username, event, dayofweek, startTime, endTime)
             VALUES (%s, %s, %s, %s, %s)
-            """, (username, classname, dayofweek, starttime, endtime))
+            """, (username, event, dayofweek, starttime, endtime))
     conn.commit()
     cursor.close()
     conn.close()
@@ -350,6 +354,7 @@ def startDB():
     testConnectDB() #try see if successful
     createUsersTables()
     createEventTables()
+    createScheduleTable()
     createDiningTables()
     seedRestaurants()
     seedTestEvent()

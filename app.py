@@ -66,6 +66,8 @@ def viewSchedule():
     return render_template('view_schedule.html', username=username, schedules=schedules)
 
 
+
+
 #chicken tinder routes 
 #THESE ARE COMMENTED OUT BC WE DONT HAVE EVENTS SET UP SO TESTING ROUTE IN IN USE
 #@app.route('/chicken-tinder')
