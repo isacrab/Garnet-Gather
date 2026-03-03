@@ -33,7 +33,11 @@ def userSignup():
             flash("Please enter a valid @fsu.edu email address.", "emailerror")
             return render_template('signup.html')
 
-    
+        if not validUser(fsuid):    #check if already signed up
+            print("Account already exists")
+            flash("An account with that username already exists.", "usererror")
+            return render_template('signup.html')
+
         if not validPassword(password):
             print("invalid password")
             flash("Please enter a valid password (8-25 characters, with at least one number and one uppercase letter).", "passworderror")

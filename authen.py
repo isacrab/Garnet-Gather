@@ -18,4 +18,17 @@ def validPassword(password): #password needs to be at least 8 characters but at 
         valid = False
     return valid
     
+def validUser(username):
+    from db import getConnection
+    conn = getConnection()
+    cursor = conn.cursor()
+
+    valid = True
+    cursor.execute("SELECT username FROM users WHERE username = %s", (username,))
+    result = cursor.fetchone()
+    if result is not None:
+        valid = False
     
+    cursor.close()
+    conn.close()
+    return valid
