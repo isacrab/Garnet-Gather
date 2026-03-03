@@ -142,6 +142,13 @@ def newRSO(name, email):  #created to insert new RSO into table Organizations, c
         cursor.execute("""INSERT INTO Organizations (orgName, email) VALUES (%s,%s)
                        """, (name, email))
         
+        #delete later
+        cursor.execute("SELECT * FROM Users")
+
+        rows = cursor.fetchall()
+        for r in rows:
+            print(r)
+
         conn.commit()
         cursor.close()
         conn.close()
