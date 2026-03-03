@@ -55,7 +55,6 @@ def hashPassword(password):
     salt = bcrypt.gensalt()
 
     hash= bcrypt.hashpw(byte, salt)
-    print(password)
-    print(hash)
+
     return hash
  
