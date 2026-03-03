@@ -32,3 +32,30 @@ def validUser(username):
     cursor.close()
     conn.close()
     return valid
+
+def validEmail(email):
+    from db import getConnection
+    conn = getConnection()
+    cursor = conn.cursor()
+
+    valid = True
+    cursor.execute("SELECT email FROM users WHERE email = %s", (email,))
+    result = cursor.fetchone()
+    if result is not None:
+        valid = False
+    
+    cursor.close()
+    conn.close()
+    return valid
+
+def hashPassword(password):
+    import bcrypt
+    pw = password
+    byte = pw.encode('utf-8')
+    salt = bcrypt.gensalt()
+
+    hash= bcrypt.hashpw(byte, salt)
+    print(password)
+    print(hash)
+    return hash
+ 

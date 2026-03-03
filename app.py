@@ -38,10 +38,17 @@ def userSignup():
             flash("An account with that username already exists.", "usererror")
             return render_template('signup.html')
 
+        if not validEmail(email):    #check if email already in use
+            print("Email already in use")
+            flash("An account with that email already exists.", "emailerror")
+            return render_template('signup.html')
+
         if not validPassword(password):
             print("invalid password")
             flash("Please enter a valid password (8-25 characters, with at least one number and one uppercase letter).", "passworderror")
             return render_template('signup.html')
+       
+        password = hashPassword(password)    #hash password before putting in db
 
     createUser(fsuid,password,email,fName,lName)    #actually creates user                               
 
