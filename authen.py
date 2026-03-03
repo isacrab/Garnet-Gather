@@ -1,6 +1,7 @@
 #functions for everything role based/auth based 
 import mysql.connector
 import os
+import bcrypt
 from db import *
 
 #authentication function to check if the entered email is an @fsu.edu email
@@ -57,4 +58,35 @@ def hashPassword(password):
     hash= bcrypt.hashpw(byte, salt)
 
     return hash
+
+def userExist(username,password):
+    from db import getConnection
+    conn = getConnection()
+    cursor = conn.cursor()
+
+    given=password 
+    
+    cursor.execute("SELECT username FROM users WHERE username = %s", (username,))
+    resultu = cursor.fetchone()
+    cursor.execute("SELECT passwordHash FROM users WHERE username = %s", (username,))
+    resultp = cursor.fetchone()
+    
+    
+    
+    if resultu is None:
+        print("no username found")
+        return False
+    
  
+    if resultp is None:
+        print("no password found")
+        return False
+    
+    stored=resultp[0]
+    
+    if bcrypt.checkpw(given.encode('utf-8'), stored.encode('utf-8')):
+        print("password match")
+        return True
+    cursor.close()
+    conn.close()
+    return False

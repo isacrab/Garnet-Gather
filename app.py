@@ -1,5 +1,5 @@
 #all things to make the app actually run
-from flask import Flask,render_template, request,redirect, url_for, jsonify,flash
+from flask import Flask,render_template, request,redirect, url_for, jsonify,flash,session
 from db import *
 from authen import *
 from chicken_tinder import recordVote, getRemainingRestaurants, getResults
@@ -11,8 +11,17 @@ app.secret_key ="23adkfn23rfnjfa98"
 def homepage():
     return render_template('home.html')
 
-@app.route('/login')    #login page for right now, that name /... name matches the a ref in the corresponding html
+@app.route('/login', methods=['GET', 'POST'])    #login page for right now, that name /... name matches the a ref in the corresponding html
 def login():
+    if request.method == 'POST':    #if they submit the form
+        username = request.form['username']
+        password = request.form['password']
+
+        if userExist(username,password):
+            session['username'] = username
+            return redirect(url_for('homepage'))
+        else:
+            flash("Invalid username or password.", "loginerror")
     return render_template('login.html')
 
 @app.route('/signup')       #only renders the signup page, links to userSignup that does all the actual work in db
