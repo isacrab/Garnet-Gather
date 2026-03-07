@@ -18,7 +18,7 @@
                                     {% endfor %}
                                 {% endif %}
                             {% endwith %}
-        <label for="password">Password:</label><br>
+        <label for="password">Password:(must be 8-25 characters, with at least one number and one uppercase letter)</label><br>
         <input type="password" name="password"><br><br>
         {% with messages = get_flashed_messages(category_filter="passworderror") %}
                         {% if messages %}
@@ -42,7 +42,13 @@
 
         <label for="adminCode">Code:</label><br>
         <input type="number" name="adminCode"><br><br>
-
+        {% with messages = get_flashed_messages(category_filter="codeerror") %}
+                                {% if messages %}
+                                    {% for message in messages %}
+                                    <p style="color: rgb(154, 0, 0); font-style: italic;" > {{ message }} </p>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endwith %}
         <input type="submit" value="submit">
     </form>
 

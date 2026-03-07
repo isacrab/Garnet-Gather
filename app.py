@@ -9,6 +9,8 @@ app.secret_key ="23adkfn23rfnjfa98"
 
 @app.route('/') #home page for now, will change to login
 def homepage():
+    if 'username' not in session:
+        return redirect(url_for('login'))
     return render_template('home.html')
 
 @app.route('/login', methods=['GET', 'POST'])    #login page for right now, that name /... name matches the a ref in the corresponding html
@@ -104,7 +106,8 @@ def orgSignup():
         if(code==8008135):
             createUser(fsuid,password,email,fName, 0, code)    #actually creates user, in db.py 
         else:
-            print("Error in creating an admin user")
+            flash("Please enter a valid code.", "codeerror")
+            return render_template('rsoSignup.html')
     return redirect(url_for('login'))
 
 
