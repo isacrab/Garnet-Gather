@@ -59,7 +59,7 @@ def userSignup():
             return render_template('signup.html')
        
         password = hashPassword(password)    #hash password before putting in db
-
+    flash("Account created successfully! Please log in.", "success")
     createUser(fsuid,password,email,fName,lName, 0)    #actually creates user, in db.py                              
 
     return redirect(url_for('login'))
@@ -83,7 +83,6 @@ def orgSignup():
             createUser(fsuid,password,email,fName, 0, code)    #actually creates user, in db.py 
         else:
             print("Error in creating an admin user")
-    
     return redirect(url_for('login'))
 
 
