@@ -27,7 +27,7 @@ def login():
     return render_template('login.html')
 
 @app.route('/signup')       #only renders the signup page, links to /userSignup that does all the actual work in db
-def singup():
+def signup():
     return render_template('signup.html')
 
 #THIS IS FOR USERS ONLY
@@ -61,8 +61,9 @@ def userSignup():
             return render_template('signup.html')
        
         password = hashPassword(password)    #hash password before putting in db
-    flash("Account created successfully! Please log in.", "success")
-    createUser(fsuid,password,email,fName,lName, 0)    #actually creates user, in db.py                              
+
+        flash("Account created successfully! Please log in.", "success")
+        createUser(fsuid,password,email,fName,lName, 0)    #actually creates user, in db.py                              
 
     return redirect(url_for('login'))
 
