@@ -11,13 +11,32 @@
     <form action="{{ url_for('orgSignup') }}" method = "POST">
         <label for="username">Username:</label><br>
         <input type="text" name="username"><br><br>
-
+        {% with messages = get_flashed_messages(category_filter="usererror") %}
+                                {% if messages %}
+                                    {% for message in messages %}
+                                    <p style="color: rgb(154, 0, 0); font-style: italic;" > {{ message }} </p>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endwith %}
         <label for="password">Password:</label><br>
         <input type="password" name="password"><br><br>
-
+        {% with messages = get_flashed_messages(category_filter="passworderror") %}
+                        {% if messages %}
+                            {% for message in messages %}
+                            <p style="color: rgb(154, 0, 0); font-style: italic;" > {{ message }} </p>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                
         <label for="email">RSO Email:</label><br>
         <input type="email" name="email"><br><br>
-
+        {% with messages = get_flashed_messages(category_filter="emailerror") %}
+                        {% if messages %}
+                            {% for message in messages %}
+                            <p style="color: rgb(154, 0, 0); font-style: italic;" > {{ message }} </p>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
         <label for="firstname">Organization Name:</label><br>
         <input type="text" name="firstname"><br><br>
 
