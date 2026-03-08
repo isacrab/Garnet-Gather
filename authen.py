@@ -83,6 +83,7 @@ def userExist(username,password):
         return False
     
     stored=resultp[0]
+
     
     if bcrypt.checkpw(given.encode('utf-8'), stored.encode('utf-8')):
         print("password match")

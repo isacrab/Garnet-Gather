@@ -3,9 +3,17 @@ from flask import Flask,render_template, request,redirect, url_for, jsonify,flas
 from db import *
 from authen import *
 from chicken_tinder import recordVote, getRemainingRestaurants, getResults
+from datetime import timedelta
 
 app = Flask(__name__)
 app.secret_key ="23adkfn23rfnjfa98" 
+app.permanent_session_lifetime = timedelta(hours=5)
+
+@app.before_request
+def refresh_session():
+    if 'username' in session:
+        session.modified = True
+
 
 @app.route('/') #home page for now, will change to login
 def homepage():
@@ -20,11 +28,29 @@ def login():
         password = request.form['password']
 
         if userExist(username,password):
-            session['username'] = username
-            return redirect(url_for('homepage'))
+            conn = getConnection()
+            cursor= conn.cursor()
+            cursor.execute("SELECT role FROM users WHERE username = %s", (username,))
+            result = cursor.fetchone()
+
+           
+
+            if result:
+                role = result[0]
+                session['username'] = username
+                session['role']= role
+
+                session.permanent= True 
+                return redirect(url_for('homepage'))
         else:
-            flash("Invalid username or password.", "loginerror")
+            flash("Invalid username or password.", "loginerror") 
+
     return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
 
 @app.route('/signup')       #only renders the signup page, links to /userSignup that does all the actual work in db
 def signup():
