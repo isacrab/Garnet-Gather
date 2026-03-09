@@ -223,7 +223,7 @@ def createEventTables():
     cursor.close()
     conn.close()
 
-def createEvent(eventName, location, eventDate, startTime, endTime, description, eventType, eventStatus, orgName, createdBy, isDiningEvent, eventId, username, orgId):
+def createEvent(eventName, location, eventDate, startTime, endTime, description, eventType, eventStatus, orgName, createdBy, isDiningEvent):
     conn = getConnection()
     cursor = conn.cursor()
 
@@ -232,21 +232,75 @@ def createEvent(eventName, location, eventDate, startTime, endTime, description,
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
             (eventName, location, eventDate, startTime, endTime, description, eventType, eventStatus, orgName, createdBy, isDiningEvent ))
 
+    eventId = cursor.lastrowid #grabs last eventid
+
     cursor.execute("""
             INSERT INTO EventMembers(eventId, username)
             VALUES (%s, %s)""",
-            (eventId, username))
+            (eventId, createdBy))
 
+    #cursor.execute("""
+    #        INSERT INTO Organizations(orgName)
+    #        VALUES (%s)""",
+    #        (orgName,))  
+
+    #cursor.execute("""  
+    #        INSERT INTO OrgMembers(orgId, username)
+    #        VALUES (%s, %s)""",
+    #        (orgId, username))  
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return eventId
+
+def getEventById(eventId):
+    conn = getConnection()
+    cursor = conn.cursor()
     cursor.execute("""
-            INSERT INTO Organizations(orgName)
-            VALUES (%s)""",
-            (orgName,))  
+            SELECT id, eventName, location, eventDate, startTime, endTime,
+                   description, eventType, eventStatus, orgName, createdBy, isDiningEvent
+            FROM Events WHERE id = %s""",
+            (eventId,))
+    event = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return event
 
-    cursor.execute("""  
-            INSERT INTO OrgMembers(orgId, username)
-            VALUES (%s, %s)""",
-            (orgId, username))  
+def getAllEvents():     #for events page
+    conn = getConnection()
+    cursor = conn.cursor()
+    cursor.execute("""
+            SELECT id, eventName, location, eventDate, startTime, endTime,
+                   description, eventType, eventStatus, orgName, createdBy, isDiningEvent
+            FROM Events
+            ORDER BY eventDate, startTime """)
+    events = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return events
 
+def getEventMembers(eventId):
+    conn = getConnection()
+    cursor = conn.cursor()
+    cursor.execute("""
+            SELECT Users.username, Users.firstName, Users.lastName
+            FROM EventMembers
+            JOIN Users ON EventMembers.username = Users.username
+            WHERE EventMembers.eventId = %s """,
+            (eventId,))
+    members = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return members
+
+def joinEvent(eventId, username):
+    conn = getConnection()
+    cursor = conn.cursor()
+    cursor.execute("""
+            INSERT IGNORE INTO EventMembers(eventId, username)
+            VALUES (%s, %s) """,
+            (eventId, username))
     conn.commit()
     cursor.close()
     conn.close()
@@ -318,36 +372,6 @@ def seedRestaurants():
     conn.commit()
     cursor.close()
     conn.close()
-
-
-#THIS IS SO KAY CAN TEST CHICKEN TINDER REMOVE LATER
-def seedTestEvent():
-    conn = getConnection()
-    cursor = conn.cursor()
-    
-    #create test org
-    cursor.execute("""
-        INSERT IGNORE INTO Organizations (id, orgName) 
-        VALUES (1, 'Test Organization')
-    """)
-    
-    #create test user
-    cursor.execute("""
-        INSERT IGNORE INTO Users (username, passwordHash, email, firstName, lastName, role)
-        VALUES ('testuser', 'testpass', 'test@fsu.edu', 'Test', 'User', 'Student')
-    """)
-    
-    #create test event
-    cursor.execute("""
-        INSERT IGNORE INTO Events (id, eventName, location, eventDate, startTime, endTime, 
-                                   description, eventType, eventStatus, orgName, createdBy, isDiningEvent)
-        VALUES (1, 'Test Dining Event', 'Student Union', '2026-03-01', '12:00:00', '13:00:00',
-                'Test event for chicken tinder', 'Dining', 'Active', 'Test Organization', 'testuser', TRUE)
-    """)
-    
-    conn.commit()
-    cursor.close()
-    conn.close()
     
 
 def startDB():
@@ -357,23 +381,22 @@ def startDB():
     createScheduleTable()
     createDiningTables()
     seedRestaurants()
-    seedTestEvent()
    
 
 if __name__ == '__main__':
     ans = input("Drop tables? y/n: ").lower()
     if ans == 'y':
         dropTables()
-    ans = input("Clear votes? y/n: ").lower()
-    if ans == 'y':
-        conn = getConnection()
-        cursor = conn.cursor()
+    #ans = input("Clear votes? y/n: ").lower()
+    #if ans == 'y':
+        #conn = getConnection()
+        #cursor = conn.cursor()
 
-        cursor.execute("DELETE FROM DiningVotes WHERE username = 'testuser'")
+        #cursor.execute("DELETE FROM DiningVotes WHERE username = 'testuser'")
 
-        conn.commit()
-        cursor.close()
-        conn.close()
+        #conn.commit()
+        #cursor.close()
+        #conn.close()
 
     startDB()
 
