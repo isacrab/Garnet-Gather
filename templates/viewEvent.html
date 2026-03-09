@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ event[1] }}</title>
+</head>
+<body>
+    <!--event info-->
+    <!--<h1 id = "eventName"></h1>
+    <p id = "location"></p>
+    <p id = "eventDate"></p>
+    <p id = "startTime"></p>
+    <p id = "endTime"></p>
+    <p id = "description"></p>
+    <p id = "eventType"></p>
+    <p id = "orgName"></p>-->
+    <h1>{{ event[1] }}</h1>
+    <p>Location: {{ event[2] }}</p>
+    <p>Date: {{ event[3] }}</p>
+    <p>Start Time: {{ event[4] }}</p>
+    <p>End Time: {{ event[5] }}</p>
+    <p>Description: {{ event[6] }}</p>
+    <p>Event Type: {{ event[7] }}</p>
+    <p>Status: {{ event[8] }}</p>
+    <p>Organization: {{ event[9] }}</p>
+    <!--list the memebers-->
+    <h3>Members</h3>
+    <!--<ul id = "membersList"></ul>-->
+    <ul>
+        {% for member in members %}
+            <!--Firstname, lastname-->
+            <li>{{ member[1] }} {{ member[2] }}</li>
+        {% endfor %}
+    </ul>
+
+    <!--CHICKEN TINDER CONNECTION YIPPEEEEEE-->
+    {% if event[11] %}
+        <a href="/chicken-tinder/{{ event[0] }}">
+            <button>Start Chicken Tinder</button>
+        </a>    
+    {% endif %}
+    <a href = "/events">Back</a>
+</body>
+</html>
