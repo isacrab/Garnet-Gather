@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Friends Test</title>
+</head>
+<body>
+
+<h1>Friends Test</h1>
+
+<h2>Send Friend Request</h2>
+<input id="req-sender" placeholder="your username">
+<input id="req-receiver" placeholder="their username">
+<button onclick="sendRequest()">Send</button>
+<p id="req-result"></p>
+
+<h2>Accept Friend Request</h2>
+<input id="acc-receiver" placeholder="your username">
+<input id="acc-sender" placeholder="who sent you the request">
+<button onclick="acceptRequest()">Accept</button>
+<p id="acc-result"></p>
+
+<h2>View Friends</h2>
+<input id="list-user" placeholder="your username">
+<button onclick="getFriends()">View</button>
+<p id="list-result"></p>
+
+<h2>View Pending Requests</h2>
+<input id="pending-user" placeholder="your username">
+<button onclick="getPending()">View</button>
+<p id="pending-result"></p>
+
+<h2>Remove Friend</h2>
+<input id="rem-user" placeholder="your username">
+<input id="rem-friend" placeholder="their username">
+<button onclick="removeFriend()">Remove</button>
+<p id="rem-result"></p>
+
+<script>
+  async function sendRequest() {
+    const sender = document.getElementById('req-sender').value.trim()
+    const receiver = document.getElementById('req-receiver').value.trim()
+    const data = await fetch('/api/friends/request', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({sender, receiver})
+    }).then(r => r.json())
+    document.getElementById('req-result').textContent = data.result
+  }
+
+  async function acceptRequest() {
+    const sender = document.getElementById('acc-sender').value.trim()
+    const receiver = document.getElementById('acc-receiver').value.trim()
+    const data = await fetch('/api/friends/accept', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({sender, receiver})
+    }).then(r => r.json())
+    document.getElementById('acc-result').textContent = data.result
+  }
+
+  async function getFriends() {
+    const user = document.getElementById('list-user').value.trim()
+    const data = await fetch(`/api/friends/${user}`).then(r => r.json())
+    document.getElementById('list-result').textContent =
+      data.length === 0 ? 'No friends yet.' : data.map(f => `${f.firstName} ${f.lastName} (${f.username})`).join(', ')
+  }
+
+  async function getPending() {
+    const user = document.getElementById('pending-user').value.trim()
+    const data = await fetch(`/api/friends/pending/${user}`).then(r => r.json())
+    document.getElementById('pending-result').textContent =
+      data.length === 0 ? 'No pending requests.' : data.map(f => `${f.firstName} ${f.lastName} (${f.username})`).join(', ')
+  }
+
+  async function removeFriend() {
+    const username = document.getElementById('rem-user').value.trim()
+    const friendUsername = document.getElementById('rem-friend').value.trim()
+    const data = await fetch('/api/friends/remove', {
+      method: 'DELETE', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username, friendUsername})
+    }).then(r => r.json())
+    document.getElementById('rem-result').textContent = data.result
+  }
+</script>
+</body>
+</html>
