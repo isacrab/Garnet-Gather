@@ -36,9 +36,10 @@ def userSignup():
     
     return redirect(url_for('login'))
 
-@app.route('/schedule_insert')
+@app.route('/schedule_insert') #CHANGED HERE
 def schedulepage():
-        return render_template('schedule_insert.html')#send to the schedule page, where they can submit their schedule info
+    schedules=getEvents();#have to call the getevent func in here bc the html now need to show the events, pass into return bc it needs those values also
+    return render_template('schedule_insert.html',schedules=schedules)#send to the schedule page, where they can submit their schedule info
 
 @app.route('/scheduleSubmit', methods = ['POST'])  #handles schedule submission, gets info from form and puts it in db, then redirects to schedule page to show it off')
 def scheduleSubmit():
@@ -51,7 +52,7 @@ def viewSchedule():
 #added this
 @app.route('/deleteschedule', methods = ['POST'])
 def deleteSchedule():
-        return deleteschedule()
+        return deleteschedule() 
 
 #event routes
 #page of all ur events

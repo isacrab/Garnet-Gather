@@ -1,7 +1,6 @@
 from logging import PlaceHolder
 from db import *
-from flask import request, render_template
-
+from flask import request, render_template, redirect, url_for
 def schedulesubmit():
     username = request.form['username']
     event = request.form.getlist('event[]')
@@ -11,7 +10,7 @@ def schedulesubmit():
     
     for i in range(len(event)):
         createSchedules(username, event[i], day[i], start[i], end[i]) 
-    return render_template('schedule_insert.html')
+    return redirect(url_for('schedulepage'))#change to redirect url bc it would not keep the event on right side filled, but call the function and now it does
 
 def viewschedule():
     username = request.args.get('username')
@@ -45,4 +44,4 @@ def deleteschedule():
    
    cursor.close()
    conn.close()
-   return render_template('schedule_insert.html')
+   return redirect(url_for('schedulepage'))
