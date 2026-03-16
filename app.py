@@ -38,7 +38,7 @@ def userSignup():
 
 @app.route('/schedule_insert')
 def schedulepage():
-        return render_template('schedule_insert.html')
+        return render_template('schedule_insert.html')#send to the schedule page, where they can submit their schedule info
 
 @app.route('/scheduleSubmit', methods = ['POST'])  #handles schedule submission, gets info from form and puts it in db, then redirects to schedule page to show it off')
 def scheduleSubmit():
@@ -47,6 +47,11 @@ def scheduleSubmit():
 @app.route('/viewSchedule') 
 def viewSchedule():
     return viewschedule()
+
+#added this
+@app.route('/deleteschedule', methods = ['POST'])
+def deleteSchedule():
+        return deleteschedule()
 
 #event routes
 #page of all ur events

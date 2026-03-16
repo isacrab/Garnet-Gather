@@ -33,7 +33,6 @@
     </form>
 
     <script>
-        //used chat for these, but can try to figure different way to do it?
         function createTable() {
             const n = parseInt(document.getElementById("numRows").value);
             const container = document.getElementById("tableContainer");
@@ -55,26 +54,48 @@
                 let row = document.createElement("tr");
 
                 row.innerHTML = `
-                            <td><input type="text" name="event[]" required></td>
-                            <td>
-                                <select name="dayofweek[]">
-                                    <option>Mon</option>
-                                    <option>Tue</option>
-                                    <option>Wed</option>
-                                    <option>Thu</option>
-                                    <option>Fri</option>
-                                </select>
-                            </td>
-                <td><input type="time" name="startTime[]"required></td>
-                <td><input type="time" name="endTime[]"required></td>
+                                <td><input type="text" name="event[]" required></td>
+                                <td>
+                                    <select name="dayofweek[]">
+                                        <option>Mon</option>
+                                        <option>Tue</option>
+                                        <option>Wed</option>
+                                        <option>Thu</option>
+                                        <option>Fri</option>
+                                    </select>
+                                </td>
+                    <td><input type="time" name="startTime[]"required></td>
+                    <td><input type="time" name="endTime[]"required></td>
 
-                        `;
+                            `;
 
                 table.appendChild(row);
             }
 
             container.appendChild(table);
         }</script>
+
+    <h3>Delete an Event</h3>
+
+    <form method="POST" action="/deleteschedule">
+
+        <label>Username:</label>
+        <input type="text" name="username" required>
+
+        <br><br>
+
+        <label>Event to Delete:</label>
+        <input type="text" name="event" required>
+
+        <br><br>
+
+        <button type="submit">Delete Event</button>
+
+    </form>
+
+
+
+
 
 
     <a href='/'>
