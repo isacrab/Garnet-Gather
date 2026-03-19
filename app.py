@@ -6,8 +6,10 @@ from datetime import timedelta
 from events import createAnEvent, getEvent, getEvents, joinAnEvent
 from schedule import *
 from authen import *
+from friends_routes import friends_bp
 
 app = Flask(__name__)
+app.register_blueprint(friends_bp)
 app.secret_key ="23adkfn23rfnjfa98" 
 app.permanent_session_lifetime = timedelta(hours=5)
 
