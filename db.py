@@ -178,11 +178,11 @@ def newRSO(name, email):  #created to insert new RSO into table Organizations, c
         print("Something went wrong:", e)
 
 
-def createSchedules(username,classname,dayofweek,starttime,endtime):
+def createSchedules(username,event,dayofweek,starttime,endtime):
     conn = getConnection()
     cursor = conn.cursor()
     cursor.execute("""
-            INSERT INTO Schedules (username, classname, dayofweek, starttime, endtime)
+            INSERT INTO Schedules (username, event, dayofweek, startTime, endTime)
             VALUES (%s, %s, %s, %s, %s)
             """, (username, event, dayofweek, starttime, endtime))
     conn.commit()
