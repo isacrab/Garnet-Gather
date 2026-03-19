@@ -442,7 +442,7 @@ def startDB():
     createScheduleTable()
     createDiningTables()
     seedRestaurants()
-    #seedTestEvent()
+    seedTestEvent()
    
 
 if __name__ == '__main__':
