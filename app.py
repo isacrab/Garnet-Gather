@@ -227,6 +227,11 @@ def submitVote():
     recordVote(eventId, username, restaurantId, vote)
     return redirect(url_for('chickenTinder', eventId=eventId))
 
+@app.route('/friendsTest')  
+def friendsTest():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('friendFrontEnd.html')
 
 if __name__=='__main__':    #main
     app.run(debug=True)
