@@ -5,6 +5,7 @@ from chicken_tinder import recordVote, getRemainingRestaurants, getResults
 from datetime import timedelta
 from events import createAnEvent, getEvent, getEvents, joinAnEvent
 from schedule import *
+from authen import *
 
 app = Flask(__name__)
 app.secret_key ="23adkfn23rfnjfa98" 
