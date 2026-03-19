@@ -10,7 +10,7 @@ If you add any dependencies, please add them in there and make sure you are in t
 
 Download mySql:
 - go to their page and download their installer (https://dev.mysql.com/downloads/installer/) 
-- download the type that includes a server
+- download the type that says full
 - when you get to window, download the web community option
 - please please write down the password you choose we need it to access the db locally
 

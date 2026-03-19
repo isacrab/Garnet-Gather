@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Event</title>
+</head>
+<body>
+    
+    <h1>Create Event</h1>
+
+    <!--INPUT SECTION!!!-->
+    <form action = "/createEvent" method="POST"> <!--send results to createEvent-->
+        <label for="eventName">Event Name:</label><br>
+        <input type="text" id="eventName" name="eventName"><br><br>
+
+        <label for="location">Location:</label><br>
+        <input type="text" id="location" name="location"><br><br>
+
+        <label for="eventDate">Event Date:</label><br>
+        <input type="date" id="eventDate" name="eventDate"><br><br>
+
+        <label for="startTime">Start Time:</label><br>
+        <input type="time" id="startTime" name="startTime"><br><br>
+
+        <label for="endTime">End Time:</label><br>
+        <input type="time" id="endTime" name="endTime"><br><br>
+
+        <label for="description">Description:</label><br>
+        <input type="text" id="description" name="description"><br><br>
+
+        <label for="eventType">Event Type:</label><br>
+        <input type="text" id="eventType" name="eventType"><br><br>
+
+        <!--<label for="orgName">Organization Name:</label><br>
+        <input type="text" id="orgName" name="orgName"><br><br>-->
+
+        <label for="isDiningEvent">Will this event involve dining?</label><br>
+        <input type="checkbox" id="isDiningEvent" name="isDiningEvent" value="1"><br><br>
+
+        <label for="eventStatus">Event Status:</label><br>
+        <input type="text" id="eventStatus" name="eventStatus"><br><br>
+
+        <!--For tretsing w/o session based
+        <label for="createdBy">Created By:</label><br>
+        <input type="text" id="createdBy" name="createdBy"><br><br>-->
+
+
+        <input type="submit" value="Create Event">
+    </form>
+
+    <a href="/events">Back to Events Page</a>
+</body>
+</html>
