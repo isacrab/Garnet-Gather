@@ -17,15 +17,33 @@ def createFriendTables():
     #foreign make sure like both usernames must exist in Users table, so if a user gets yeeted, their friend row gets tossed too
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS Friends (
-            username1   VARCHAR(50) NOT NULL,   #person who sent the request
-            username2   VARCHAR(50) NOT NULL,   #person who recieved request
+            username1   VARCHAR(50) NOT NULL,   
+            username2   VARCHAR(50) NOT NULL,   
             status      ENUM('pending', 'accepted') NOT NULL DEFAULT 'pending',
-            PRIMARY KEY (username1, username2), #combo must be unique
+            PRIMARY KEY (username1, username2), 
             FOREIGN KEY (username1) REFERENCES Users(username) ON DELETE CASCADE,
             FOREIGN KEY (username2) REFERENCES Users(username) ON DELETE CASCADE
         )
     """)
-    #TODO: prob should add group stuff too
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS FriendGroups (
+            id            INT AUTO_INCREMENT PRIMARY KEY,
+            groupName     VARCHAR(100) NOT NULL,
+            adminUsername VARCHAR(50) NOT NULL,
+            FOREIGN KEY (adminUsername) REFERENCES Users(username) ON DELETE CASCADE
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS FriendGroupMembers (
+            groupId  INT NOT NULL,
+            username VARCHAR(50) NOT NULL,
+            PRIMARY KEY (groupId, username),
+            FOREIGN KEY (groupId)  REFERENCES FriendGroups(id) ON DELETE CASCADE,
+            FOREIGN KEY (username) REFERENCES Users(username)  ON DELETE CASCADE
+        )
+    """)
     conn.commit()
     cursor.close()
     conn.close()
@@ -39,7 +57,7 @@ def areFriends(user1, user2):
     conn = getConnection()  
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT 1 FROM Friends   #want to know if a row exists
+        SELECT 1 FROM Friends  
         WHERE username1 = %s AND username2 = %s AND status = 'accepted'
     """, (user1, user2))
     isFriends = cursor.fetchone()      #gets first result. If row was found True, if not False
@@ -168,4 +186,152 @@ def getPendingRequests(username):
     return [{'username': r[0], 'firstName': r[1], 'lastName': r[2]} for r in rows] #loops through every row in rows and converts each from tuple into a dict
     #doing this so frontend gets list as JSON
 
-    #TODO: need to add friend group stuff
+#TODO: need to add friend group stuff
+#create a new friend group, every person in the group, including admin must be friends with everyone else
+#returns {'groupId': int} on success or {'error': str} if the friend check fails
+def createGroup(adminUsername, groupName, memberUsernames):
+    #combine the admin list and member list into one list. set() will remove duplicates
+    allMembers = list(set(memberUsernames + [adminUsername]))
+
+    #loops through every possible pair of members and checks if they are frineds wiht each other
+    for i in range(len(allMembers)):
+        for j in range(i+1, len(allMembers)):
+            if not areFriends(allMembers[i],allMembers[j]):
+                return {'error': f"{allMembers[i]} and {allMembers[j]} are not friends."}
+
+    conn = getConnection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO FriendGroups (groupName, adminUsername) VALUES (%s, %s)
+    """, (groupName, adminUsername))
+
+    groupId = cursor.lastrowid  #grabs the generated id that mysql assigned to the new group
+
+    #loops through every member and adds them to FriendGroupMembers. If someone is already in group, skip over them
+    for member in allMembers:
+        cursor.execute("""
+            INSERT IGNORE INTO FriendGroupMembers (groupId, username) VALUES (%s, %s)
+        """, (groupId, member))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {'groupId': groupId}
+
+
+#add a new member to an already made group, can only be done by admin
+#new menber must be friends with every current member
+def addToGroup(adminUsername, groupId, newMember):
+    conn = getConnection()
+    cursor = conn.cursor()
+
+    #make sure the group exists and the person trying to add someone is the admin
+    cursor.execute("SELECT adminUsername FROM FriendGroups WHERE id = %s", (groupId,))
+    group = cursor.fetchone()
+    if not group:
+        cursor.close(); conn.close(); return 'group not found'
+    if group[0]!= adminUsername:
+        cursor.close(); conn.close(); return 'not admin'
+
+    #gets everyone already in the group and stores their usernames in a list
+    cursor.execute("SELECT username FROM FriendGroupMembers WHERE groupId = %s", (groupId,))
+    currentMembers = [row[0] for row in cursor.fetchall()]
+    cursor.close(); conn.close()
+
+    if newMember in currentMembers:
+        return 'already member'    #if person being added it already in group
+
+    #checks that the new member being added is friends with every other member, if they arent friends with one person , return who 
+    for member in currentMembers:
+        if not areFriends(newMember,member):
+            return f'not friends with {member}'
+
+    conn = getConnection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO FriendGroupMembers (groupId, username) VALUES (%s, %s)
+    """, (groupId, newMember))
+    conn.commit()
+    cursor.close(); conn.close()
+    return 'added'
+
+
+#Leave a group
+#If the admin leaves, the whole group gets deleted
+def leaveGroup(username, groupId):
+    conn = getConnection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT adminUsername FROM FriendGroups WHERE id = %s", (groupId,))
+    group = cursor.fetchone()
+    cursor.close(); conn.close()
+
+    if not group:
+        return 'group not found'
+
+    #if person leaving is admin, yeet the whole group instead
+    if group[0] == username:
+        return deleteGroup(username, groupId)
+
+    #if person leaving is not admin, remove their row from FriendGroupMembers
+    conn = getConnection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        DELETE FROM FriendGroupMembers WHERE groupId=%s AND username=%s
+    """, (groupId, username))
+    conn.commit()
+    cursor.close(); conn.close()
+    return 'you left'
+
+
+#delete an entire group, can only be done by admin
+#FriendGroupMembers rows are removed automatically
+def deleteGroup(adminUsername, groupId):
+    conn = getConnection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT adminUsername FROM FriendGroups WHERE id = %s", (groupId,))
+    group = cursor.fetchone()
+    if not group:
+        cursor.close(); conn.close(); return 'group not found'
+    if group[0] != adminUsername:
+        cursor.close(); conn.close(); return 'not admin'
+
+    cursor.execute("DELETE FROM FriendGroups WHERE id = %s", (groupId,))
+    conn.commit()
+    cursor.close(); conn.close()
+    return 'deleted group'
+
+
+#et all members of a group
+def getGroupMembers(groupId):
+    conn = getConnection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT U.username, U.firstName, U.lastName
+        FROM FriendGroupMembers FGM
+        JOIN Users U ON U.username = FGM.username
+        WHERE FGM.groupId = %s
+    """, (groupId,))
+
+    rows = cursor.fetchall()
+    cursor.close(); conn.close()
+    return [{'username': r[0], 'firstName': r[1], 'lastName': r[2]} for r in rows]  #looops through each row, and turns each into a dict
+
+
+#get all groups a user belongs to
+def getUserGroups(username):
+    conn = getConnection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT FG.id, FG.groupName, FG.adminUsername
+        FROM FriendGroupMembers FGM
+        JOIN FriendGroups FG ON FG.id = FGM.groupId
+        WHERE FGM.username = %s
+    """, (username,))
+
+    rows = cursor.fetchall()
+    cursor.close(); conn.close()
+    return [{'groupId': r[0], 'groupName': r[1], 'adminUsername': r[2]} for r in rows] #loops through each row, and turns each into a dict
