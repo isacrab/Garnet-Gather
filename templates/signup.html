@@ -8,15 +8,37 @@
 
     <h2>Please enter your information here</h2>
 
+    
+
     <form action="{{ url_for('userSignup') }}" method = "POST">
         <label for="username">FSUID:</label><br>
         <input type="text" name="username"><br><br>
-
-        <label for="password">Password:</label><br>
+        {% with messages = get_flashed_messages(category_filter="usererror") %}
+                        {% if messages %}
+                            {% for message in messages %}
+                            <p style="color: rgb(154, 0, 0); font-style: italic;" > {{ message }} </p>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+        <label for="password">Password: (must be 8-25 characters, with at least one number and one uppercase letter)</label><br>
         <input type="password" name="password"><br><br>
-
-        <label for="email">Email:</label><br>
+        {% with messages = get_flashed_messages(category_filter="passworderror") %}
+                {% if messages %}
+                    {% for message in messages %}
+                    <p style="color: rgb(154, 0, 0); font-style: italic;" > {{ message }} </p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        
+        <label for="email">FSU Email:</label><br>
         <input type="email" name="email"><br><br>
+        {% with messages = get_flashed_messages(category_filter="emailerror") %}
+                {% if messages %}
+                    {% for message in messages %}
+                    <p style="color: rgb(154, 0, 0); font-style: italic;" > {{ message }} </p>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
 
         <label for="firstname">First Name:</label><br>
         <input type="text" name="firstname"><br><br>
@@ -25,6 +47,7 @@
         <input type="text" name="lastname"><br><br>
 
         <input type="submit" value="submit">
+        
     </form>
 
     <h4> <a href="/login">Back to login</a></h4>

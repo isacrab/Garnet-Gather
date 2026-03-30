@@ -1,23 +1,62 @@
 #all things to make the app actually run
-from flask import Flask,render_template, request,redirect, url_for, jsonify
+from flask import Flask,render_template, request,redirect, url_for, jsonify,flash,session
 from db import *
 from chicken_tinder import recordVote, getRemainingRestaurants, getResults
+from datetime import timedelta
 
 app = Flask(__name__)
+app.secret_key ="23adkfn23rfnjfa98" 
+app.permanent_session_lifetime = timedelta(hours=5)
 
-@app.route('/') #home page for now
+@app.before_request
+def refresh_session():
+    if 'username' in session:
+        session.modified = True
+
+
+@app.route('/') #home page for now, will change to login
 def homepage():
+    if 'username' not in session:
+        return redirect(url_for('login'))
     return render_template('home.html')
 
-@app.route('/login')    #login page for right now, that name /... name matches the a ref in the corresponding html
+@app.route('/login', methods=['GET', 'POST'])    #login page for right now, that name /... name matches the a ref in the corresponding html
 def login():
+    if request.method == 'POST':    #if they submit the form
+        username = request.form['username']
+        password = request.form['password']
+
+        if userExist(username,password):
+            conn = getConnection()
+            cursor= conn.cursor()
+            cursor.execute("SELECT role FROM users WHERE username = %s", (username,))
+            result = cursor.fetchone()
+
+           
+
+            if result:
+                role = result[0]
+                session['username'] = username
+                session['role']= role
+
+                session.permanent= True 
+                return redirect(url_for('homepage'))
+        else:
+            flash("Invalid username or password.", "loginerror") 
+
     return render_template('login.html')
 
-@app.route('/signup')       #only renders the signup page, links to userSignup that does all the actual work in db
-def singup():
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+@app.route('/signup')       #only renders the signup page, links to /userSignup that does all the actual work in db
+def signup():
     return render_template('signup.html')
 
-@app.route('/userSignup', methods = ['POST', 'GET'])  #will actually put it in db
+#THIS IS FOR USERS ONLY
+@app.route('/userSignup', methods = ['POST', 'GET'])  #will actually put it in db, links to @app.route('/signup')
 def userSignup():
     if request.method == 'POST':    #get all info to insert into table
         fsuid = request.form['username']
@@ -26,11 +65,78 @@ def userSignup():
         fName = request.form['firstname']
         lName = request.form['lastname']
     
-    createUser(fsuid,password,email,fName,lName)    #actually creates user                               
+        if not realEmail(email):    #check if email is valid
+            print("invalid email")
+            flash("Please enter a valid @fsu.edu email address.", "emailerror")
+            return render_template('signup.html')
 
+        if not validUser(fsuid):    #check if already signed up
+            print("Account already exists")
+            flash("An account with that username already exists.", "usererror")
+            return render_template('signup.html')
 
-    
+        if not validEmail(email):    #check if email already in use
+            print("Email already in use")
+            flash("An account with that email already exists.", "emailerror")
+            return render_template('signup.html')
+
+        if not validPassword(password):
+            print("invalid password")
+            flash("Please enter a valid password (8-25 characters, with at least one number and one uppercase letter).", "passworderror")
+            return render_template('signup.html')
+       
+        password = hashPassword(password)    #hash password before putting in db
+
+        flash("Account created successfully! Please log in.", "success")
+        createUser(fsuid,password,email,fName,lName, 0)    #actually creates user, in db.py                              
+
     return redirect(url_for('login'))
+
+#ONE FOR THE RSOS ONLY
+@app.route('/rsoSignup')
+def rsoSignup():
+    return render_template('rsoSignup.html')    #links with orgSignup
+
+@app.route('/orgSignup', methods = ['POST', 'GET']) #for orgSignup, gets everything and makes RSO
+def orgSignup():
+    if request.method == 'POST':
+        fsuid = request.form['username']
+        password = request.form['password']
+        email = request.form['email']
+        fName = request.form['firstname']
+        #lastname is being nulled out
+        code = int(request.form['adminCode'])
+    
+        if not realEmail(email):    #check if email is valid
+            print("invalid email")
+            flash("Please enter a valid @fsu.edu email address.", "emailerror")
+            return render_template('rsoSignup.html')
+
+        if not validUser(fsuid):    #check if already signed up
+            print("Account already exists")
+            flash("An account with that username already exists.", "usererror")
+            return render_template('rsoSignup.html')
+
+        if not validEmail(email):    #check if email already in use
+            print("Email already in use")
+            flash("An account with that email already exists.", "emailerror")
+            return render_template('rsoSignup.html')
+
+        if not validPassword(password):
+            print("invalid password")
+            flash("Please enter a valid password (8-25 characters, with at least one number and one uppercase letter).", "passworderror")
+            return render_template('rsoSignup.html')
+       
+        password = hashPassword(password)    #hash password before putting in db
+
+        if(code==8008135):
+            createUser(fsuid,password,email,fName, 0, code)    #actually creates user, in db.py 
+        else:
+            flash("Please enter a valid code.", "codeerror")
+            return render_template('rsoSignup.html')
+    return redirect(url_for('login'))
+
+
             
 #chicken tinder routes 
 #THESE ARE COMMENTED OUT BC WE DONT HAVE EVENTS SET UP SO TESTING ROUTE IN IN USE
