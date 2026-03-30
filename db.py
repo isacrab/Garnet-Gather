@@ -56,6 +56,9 @@ def dropTables():   #to keep check our bases
     cursor.close()
     conn.close()
 
+
+
+
 def createUsersTables():
     conn = None
     conn = getConnection()
@@ -78,6 +81,24 @@ def createUsersTables():
     cursor.close()
     conn.close()
 
+#creates users, default param at end to determine what role it is
+def createUser(username,password,email,fname,lname,role=0):
+    if role!=0:
+        print("user is an rso admin") #RBAC TODO: assign roles
+    
+    conn = getConnection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+            INSERT INTO Users (username, passwordHash, email, firstName, lastName, role)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (username, password, email, fname, lname, role))       #works, checked with print statements
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
 def createScheduleTable():
     conn=getConnection()
     cursor = conn.cursor()
@@ -85,7 +106,7 @@ def createScheduleTable():
     cursor.execute('CREATE TABLE IF NOT EXISTS Schedules (' 
                    'id INT AUTO_INCREMENT PRIMARY KEY,'  #the auto makes it to where each new class has a different id
                    'username VARCHAR(50) NOT NULL, '
-                   'classname VARCHAR(50) NOT NULL, '
+                   'event VARCHAR(50) NOT NULL, '
                    'dayofweek ENUM(\'Mon\',\'Tue\',\'Wed\',\'Thu\',\'Fri\') NOT NULL, '
                    'startTime TIME NOT NULL, '  
                    'endTime TIME NOT NULL, '
@@ -157,13 +178,13 @@ def newRSO(name, email):  #created to insert new RSO into table Organizations, c
         print("Something went wrong:", e)
 
 
-def createSchedules(username,classname,dayofweek,starttime,endtime):
+def createSchedules(username,event,dayofweek,starttime,endtime):
     conn = getConnection()
     cursor = conn.cursor()
     cursor.execute("""
-            INSERT INTO Schedules (username, classname, dayofweek, starttime, endtime)
+            INSERT INTO Schedules (username, event, dayofweek, startTime, endTime)
             VALUES (%s, %s, %s, %s, %s)
-            """, (username, classname, dayofweek, starttime, endtime))
+            """, (username, event, dayofweek, starttime, endtime))
     conn.commit()
     cursor.close()
     conn.close()
@@ -263,7 +284,7 @@ def createEventTables():
     cursor.close()
     conn.close()
 
-def createEvent(eventName, location, eventDate, startTime, endTime, description, eventType, eventStatus, orgName, createdBy, isDiningEvent, eventId, username, orgId):
+def createEvent(eventName, location, eventDate, startTime, endTime, description, eventType, eventStatus, orgName, createdBy, isDiningEvent):
     conn = getConnection()
     cursor = conn.cursor()
 
@@ -272,21 +293,75 @@ def createEvent(eventName, location, eventDate, startTime, endTime, description,
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
             (eventName, location, eventDate, startTime, endTime, description, eventType, eventStatus, orgName, createdBy, isDiningEvent ))
 
+    eventId = cursor.lastrowid #grabs last eventid
+
     cursor.execute("""
             INSERT INTO EventMembers(eventId, username)
             VALUES (%s, %s)""",
+            (eventId, createdBy))
+
+    #cursor.execute("""
+    #        INSERT INTO Organizations(orgName)
+    #        VALUES (%s)""",
+    #        (orgName,))  
+
+    #cursor.execute("""  
+    #        INSERT INTO OrgMembers(orgId, username)
+    #        VALUES (%s, %s)""",
+    #        (orgId, username))  
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return eventId
+
+def getEventById(eventId):
+    conn = getConnection()
+    cursor = conn.cursor()
+    cursor.execute("""
+            SELECT id, eventName, location, eventDate, startTime, endTime,
+                   description, eventType, eventStatus, orgName, createdBy, isDiningEvent
+            FROM Events WHERE id = %s""",
+            (eventId,))
+    event = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return event
+
+def getAllEvents():     #for events page
+    conn = getConnection()
+    cursor = conn.cursor()
+    cursor.execute("""
+            SELECT id, eventName, location, eventDate, startTime, endTime,
+                   description, eventType, eventStatus, orgName, createdBy, isDiningEvent
+            FROM Events
+            ORDER BY eventDate, startTime """)
+    events = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return events
+
+def getEventMembers(eventId):
+    conn = getConnection()
+    cursor = conn.cursor()
+    cursor.execute("""
+            SELECT Users.username, Users.firstName, Users.lastName
+            FROM EventMembers
+            JOIN Users ON EventMembers.username = Users.username
+            WHERE EventMembers.eventId = %s """,
+            (eventId,))
+    members = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return members
+
+def joinEvent(eventId, username):
+    conn = getConnection()
+    cursor = conn.cursor()
+    cursor.execute("""
+            INSERT IGNORE INTO EventMembers(eventId, username)
+            VALUES (%s, %s) """,
             (eventId, username))
-
-    '''cursor.execute("""
-            INSERT INTO Organizations(orgName)
-            VALUES (%s)""",
-            (orgName,)) ''' #GOT RID OF BC NOT NEEDED HERE I NEED IT SOMEWHERE ELSE :)
-
-    cursor.execute("""  
-            INSERT INTO OrgMembers(orgId, username)
-            VALUES (%s, %s)""",
-            (orgId, username))  
-
     conn.commit()
     cursor.close()
     conn.close()
@@ -358,61 +433,32 @@ def seedRestaurants():
     conn.commit()
     cursor.close()
     conn.close()
-
-
-#THIS IS SO KAY CAN TEST CHICKEN TINDER REMOVE LATER
-def seedTestEvent():
-    conn = getConnection()
-    cursor = conn.cursor()
-    
-    #create test org
-    cursor.execute("""
-        INSERT IGNORE INTO Organizations (id, orgName) 
-        VALUES (1, 'Test Organization')
-    """)
-    
-    #create test user
-    cursor.execute("""
-        INSERT IGNORE INTO Users (username, passwordHash, email, firstName, lastName, role)
-        VALUES ('testuser', 'testpass', 'test@fsu.edu', 'Test', 'User', 'Student')
-    """)
-    
-    #create test event
-    cursor.execute("""
-        INSERT IGNORE INTO Events (id, eventName, location, eventDate, startTime, endTime, 
-                                   description, eventType, eventStatus, orgName, createdBy, isDiningEvent)
-        VALUES (1, 'Test Dining Event', 'Student Union', '2026-03-01', '12:00:00', '13:00:00',
-                'Test event for chicken tinder', 'Dining', 'Active', 'Test Organization', 'testuser', TRUE)
-    """)
-    
-    conn.commit()
-    cursor.close()
-    conn.close()
     
 
 def startDB():
     testConnectDB() #try see if successful
     createUsersTables()
     createEventTables()
+    createScheduleTable()
     createDiningTables()
     seedRestaurants()
-    seedTestEvent()
+    #seedTestEvent()
    
 
 if __name__ == '__main__':
     ans = input("Drop tables? y/n: ").lower()
     if ans == 'y':
         dropTables()
-    ans = input("Clear votes? y/n: ").lower()
-    if ans == 'y':
-        conn = getConnection()
-        cursor = conn.cursor()
+    #ans = input("Clear votes? y/n: ").lower()
+    #if ans == 'y':
+        #conn = getConnection()
+        #cursor = conn.cursor()
 
-        cursor.execute("DELETE FROM DiningVotes WHERE username = 'testuser'")
+        #cursor.execute("DELETE FROM DiningVotes WHERE username = 'testuser'")
 
-        conn.commit()
-        cursor.close()
-        conn.close()
+        #conn.commit()
+        #cursor.close()
+        #conn.close()
 
     startDB()
 

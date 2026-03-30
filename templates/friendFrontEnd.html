@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Friends Test</title>
+</head>
+<body>
+
+<h1>Friends Test</h1>
+<p>Logged in as: {{ session['username'] }}</p>
+
+<!-- friend request stuff -->
+<h2>Send Friend Request</h2>
+<input id="req-receiver" placeholder="their username">
+<button onclick="sendRequest()">Send</button>
+<p id="req-result"></p>
+
+<h2>Accept Friend Request</h2>
+<input id="acc-sender" placeholder="who sent you the request">
+<button onclick="acceptRequest()">Accept</button>
+<p id="acc-result"></p>
+
+<h2>View Friends</h2>
+<button onclick="getFriends()">View</button>
+<p id="list-result"></p>
+
+<h2>View Pending Requests</h2>
+<button onclick="getPending()">View</button>
+<p id="pending-result"></p>
+
+<h2>Remove Friend</h2>
+<input id="rem-friend" placeholder="their username">
+<button onclick="removeFriend()">Remove</button>
+<p id="rem-result"></p>
+
+<hr>
+
+<!-- group stuff -->
+<h2>Create Group</h2>
+<input id="cg-name" placeholder="group name">
+<input id="cg-members" placeholder="members (comma separated)">
+<button onclick="createGroup()">Create</button>
+<p id="cg-result"></p>
+
+<h2>View My Groups</h2>
+<button onclick="getUserGroups()">View</button>
+<p id="vg-result"></p>
+
+<h2>View Group Members</h2>
+<input id="gm-id" placeholder="group id">
+<button onclick="getGroupMembers()">View</button>
+<p id="gm-result"></p>
+
+<h2>Add Member to Group</h2>
+<input id="ag-gid" placeholder="group id">
+<input id="ag-member" placeholder="username to add">
+<button onclick="addToGroup()">Add</button>
+<p id="ag-result"></p>
+
+<h2>Leave Group</h2>
+<input id="lg-gid" placeholder="group id">
+<button onclick="leaveGroup()">Leave</button>
+<p id="lg-result"></p>
+
+<h2>Delete Group</h2>
+<input id="dg-gid" placeholder="group id">
+<button onclick="deleteGroup()">Delete</button>
+<p id="dg-result"></p>
+
+<script>
+  async function sendRequest() {
+    const receiver = document.getElementById('req-receiver').value.trim()
+    const data = await fetch('/api/friends/request', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({receiver})
+    }).then(r => r.json())
+    document.getElementById('req-result').textContent = data.result
+  }
+
+  async function acceptRequest() {
+    const sender = document.getElementById('acc-sender').value.trim()
+    const data = await fetch('/api/friends/accept', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({sender})
+    }).then(r => r.json())
+    document.getElementById('acc-result').textContent = data.result
+  }
+
+  async function getFriends() {
+    const data = await fetch('/api/friends/list').then(r => r.json())
+    document.getElementById('list-result').textContent =
+      data.length === 0 ? 'no friends yet' : data.map(f => `${f.firstName} ${f.lastName} (${f.username})`).join(', ')
+  }
+
+  async function getPending() {
+    const data = await fetch('/api/friends/pending').then(r => r.json())
+    document.getElementById('pending-result').textContent =
+      data.length === 0 ? 'no pending requests' : data.map(f => `${f.firstName} ${f.lastName} (${f.username})`).join(', ')
+  }
+
+  async function removeFriend() {
+    const friendUsername = document.getElementById('rem-friend').value.trim()
+    const data = await fetch('/api/friends/remove', {
+      method: 'DELETE', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({friendUsername})
+    }).then(r => r.json())
+    document.getElementById('rem-result').textContent = data.result
+  }
+
+  async function createGroup() {
+    const groupName = document.getElementById('cg-name').value.trim()
+    const raw = document.getElementById('cg-members').value.trim()
+    const memberUsernames = raw ? raw.split(',').map(s => s.trim()).filter(Boolean) : []
+    const data = await fetch('/api/friends/groups/create', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({groupName, memberUsernames})
+    }).then(r => r.json())
+    document.getElementById('cg-result').textContent = data.error ? data.error : 'group id: ' + data.groupId
+  }
+
+  async function getUserGroups() {
+    const data = await fetch('/api/friends/groups/mine').then(r => r.json())
+    document.getElementById('vg-result').textContent =
+      data.length === 0 ? 'no groups yet' : data.map(g => `${g.groupName} (id: ${g.groupId}, admin: ${g.adminUsername})`).join(', ')
+  }
+
+  async function getGroupMembers() {
+    const gid = document.getElementById('gm-id').value.trim()
+    const data = await fetch(`/api/friends/groups/${gid}/members`).then(r => r.json())
+    document.getElementById('gm-result').textContent =
+      data.length === 0 ? 'no members' : data.map(m => `${m.firstName} ${m.lastName} (${m.username})`).join(', ')
+  }
+
+  async function addToGroup() {
+    const groupId = document.getElementById('ag-gid').value.trim()
+    const newMember = document.getElementById('ag-member').value.trim()
+    const data = await fetch(`/api/friends/groups/${groupId}/add`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({newMember})
+    }).then(r => r.json())
+    document.getElementById('ag-result').textContent = data.result
+  }
+
+  async function leaveGroup() {
+    const groupId = document.getElementById('lg-gid').value.trim()
+    const data = await fetch(`/api/friends/groups/${groupId}/leave`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({})
+    }).then(r => r.json())
+    document.getElementById('lg-result').textContent = data.result
+  }
+
+  async function deleteGroup() {
+    const groupId = document.getElementById('dg-gid').value.trim()
+    const data = await fetch(`/api/friends/groups/${groupId}/delete`, {
+      method: 'DELETE', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({})
+    }).then(r => r.json())
+    document.getElementById('dg-result').textContent = data.result
+  }
+</script>
+</body>
+</html>

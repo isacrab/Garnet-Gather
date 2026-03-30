@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <meta charset="UTF-8">
+    <title>Events</title>
+</head>
+<body>
+    <h1>Events</h1>
+
+    <!--create new event button :P-->
+    <a href="/createEvent"><button>Create Event</button></a>
+
+    {% for event in events %}
+        <div>
+            <h3>{{ event[1] }}</h3>
+            <p>{{ event[2] }}</p>
+            <p>{{ event[3] }}</p>
+            <a href="/event/{{ event[0] }}"><button>View Event</button></a>
+        </div>
+    {% endfor %}
+
+    <a href="/">Back to Home</a>
+
+</body>
+</html>

@@ -3,55 +3,62 @@
 <head>
   <meta charset = "UTF-8">
   <title>Chicken Tinder</title>
-  <style>
+  <!--need hidden class to keep everything from showin up at once-->
+  <!--<style>
     .hidden{
       display: none;
     }
-  </style>
+  </style> -->
 </head>
 <body>
   <h1>Chicken Tinder</h1>
-  <!--setup-->
-  <div id = "setup">
+  
+  {% if done %}
+    <h2>Results</h2>
+    {% for result in results %}
+        <p>{{loop.index}}. {{ result[1] }} - {{ result[3] }} votes</p>
+    {% endfor %}
+  {% else %}
+    <h2>{{ restaurant[1] }}</h2>
+    <form action="/chickenTinder/vote" method="POST">
+      <input type="hidden" name="eventId" value="{{ eventId }}">
+      <input type="hidden" name="username" value="{{ username }}">
+      <input type="hidden" name="restaurantId" value="{{ restaurant[0] }}">
+      <button type="submit" name="vote" value="1">Yes</button>
+      <button type="submit" name="vote" value="0">No</button>
+    </form>
+
+   {% endif %} 
+
+   <a href="/event/{{eventId}}">Back to Event</a>
+
+  <!-- <div id = "setup">
     <h3>Start Voting</h3>
-    <!--since events is not yet setup testing w/ inputs (REMOVE LATER)-->
-    <label>Username:</label>
-    <input type = "text" id = "username" value = "testuser"><br><br>
-
-    <label>Event Id:</label>
-    <input type = "number" id = "eventId" value = "1"><br><br>
-
-    <!--start button!!!-->
     <button onclick = "startVoting()">Start</button>
-  </div>
+  </div>-->
 
   <!--Voting sectuion-->
-  <div id = "votingSection" class = "hidden">
+  <!--<div id = "votingSection" class = "hidden">
     <h2 id = "restaurantName"></h2>
-    <!--Votes! yes and no assign to 1 and 0-->
+    Votes! yes and no assign to 1 and 0
     <button onclick = "vote(0)">No</button>
     <button onclick = "vote(1)">Yes</button>
-  </div>
+  </div>-->
 
-  <!--Display results-->
+  <!--Display results
   <div id = "resultsSection" class = "hidden">
     <h2>Voting Completed</h2>
     <div id = "resultsList"></div>
-  </div>
+  </div> -->
 
-  <!--JS script for functionality!!-->
+  <!--JS script for functionality!!
   <script>
-    //store global vars (these r for testing!!!!)
-    let currentUsername = '';
-    let currentEventId = 1;
-    let currentRestaurant = null;
-
     //start the voting by setting up stuff
     function startVoting(){
       //grab info from input
-      currentUsername = document.getElementById('username').value;
+      //currentUsername = document.getElementById('username').value;
       //grab info but parse it to make it actually an int
-      currentEventId = parseInt(document.getElementById('eventId').value);
+      //currentEventId = parseInt(document.getElementById('eventId').value);
       
       //hide the setup and show voting
       document.getElementById('setup').classList.add('hidden');
@@ -62,10 +69,10 @@
 
     //load the next rest to be voted on 
     function loadNextRestaurant(){
-      //call api w/ params
-      fetch(`/api/chickenTinder/nextRest?username=${currentUsername}&eventId=${currentEventId}`)
+      //call api w/ params -> send request to api url & get data back!!
+      fetch(`/chickenTinder/nextRest?username=${currentUsername}&eventId=${currentEventId}`)
 
-      //convert to JSON & process
+      //convert to JSON & process -> .then will take the response and convert 
         .then(response => response.json())
         .then(data => {
           if(data.done){
@@ -86,10 +93,11 @@
 
     //submit the vote!
     function vote(voteVal){
-      fetch('/api/chickenTinder/vote', { method: 'POST', 
+      //usin fetch to send(POST :D) data
+      fetch('/chickenTinder/vote', { method: 'POST', 
         //have to tell api json being sent
         headers: {'Content-Type': 'application/json'},
-        //turn vote into package
+        //turn vote into all the data sent
         body: JSON.stringify({
           username: currentUsername,
           eventId: currentEventId,
@@ -115,12 +123,14 @@
 
       //get results
       const resultsList = document.getElementById('resultsList');
+      //loop thru rests 
       results.forEach((restaurant, index) => {
         const div = document.createElement('div');
+        //rank them starting at 1 instead of 0 bc yeah
         div.innerHTML = `${index + 1}. ${restaurant.name} - ${restaurant.votes} votes`;
         resultsList.appendChild(div);
       });
     }
-  </script>
+  </script> -->
 </body>
 </html>

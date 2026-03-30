@@ -3,8 +3,13 @@ from flask import Flask,render_template, request,redirect, url_for, jsonify,flas
 from db import *
 from chicken_tinder import recordVote, getRemainingRestaurants, getResults
 from datetime import timedelta
+from events import createAnEvent, getEvent, getEvents, joinAnEvent
+from schedule import *
+from authen import *
+from friends_routes import friends_bp
 
 app = Flask(__name__)
+app.register_blueprint(friends_bp)
 app.secret_key ="23adkfn23rfnjfa98" 
 app.permanent_session_lifetime = timedelta(hours=5)
 
@@ -136,6 +141,11 @@ def orgSignup():
             return render_template('rsoSignup.html')
     return redirect(url_for('login'))
 
+@app.route('/schedule_insert') #CHANGED HERE
+def schedulepage():
+    schedules=getEvents();#have to call the getevent func in here bc the html now need to show the events, pass into return bc it needs those values also
+    return render_template('schedule_insert.html',schedules=schedules)#send to the schedule page, where they can submit their schedule info
+
 
             
 #chicken tinder routes 
@@ -144,54 +154,86 @@ def orgSignup():
 #def chickenTinder():
     #return render_template('ChickenTinder.html')
 
-#@app.route('/chickenTinderStart', methods = ['POST'])
-#def chickenTinderStart():
-    #username = request.form['username'].strip()
-    #event_id = int(request.form['event_id'])
+@app.route('/scheduleSubmit', methods = ['POST'])  #handles schedule submission, gets info from form and puts it in db, then redirects to schedule page to show it off')
+def scheduleSubmit():
+    return schedulesubmit() #calls function in schedule.py to handle all the work of putting it in db, then redirects to schedule page to show it off
 
-    #session['username'] = username
-    #return redirect(url_for('chickenTinder', event_id=event_id))
+@app.route('/viewSchedule') 
+def viewSchedule():
+    return viewschedule()
 
-#chicken tinder api endpoints
-#get remaining restaurants
-@app.route('/api/chickenTinder/nextRest', methods = ['GET'])
-def getNextRestaurant():
-    #get user and id
-    username = request.args.get('username', 'testUser')
-    eventId = int(request.args.get('eventId', 1))
+#added this
+@app.route('/deleteschedule', methods = ['POST'])
+def deleteSchedule():
+        return deleteschedule() 
 
-    #get remaning
+#event routes
+#page of all ur events
+@app.route('/events')
+def eventsPage():
+    events = getEvents()
+    return render_template('events.html', events=events)
+#def getEventsData():
+    #events = getEvents()
+    #return jsonify({'id': events[0], 'eventName': events[1], 'location': events[2], 'eventDate': events[3], 'startTime': events[4], 'endTime': events[5], 'isDiningEvent': bool(events[6])})
+
+@app.route('/createEvent', methods = ['GET'])
+def createEventPage():
+    return render_template('createEvent.html')
+
+@app.route('/createEvent', methods=['POST'])
+def submitEvent():
+    eventId = createAnEvent(request.form, session['username']) #know who created event
+    return redirect(url_for('viewEvent', eventId=eventId)) #bring it to event virepage
+
+@app.route('/event/<int:eventId>') #bring to specific event
+def viewEvent(eventId):
+    event, members = getEvent(eventId)
+    return render_template('viewEvent.html', event=event, members=members)
+
+@app.route('/joinEvent', methods=['POST'])
+def joinEventRoute():
+    eventId = int(request.form['eventId'])
+    username = request.form['username']
+    joinAnEvent(eventId, username)
+    return redirect(url_for('viewEvent', eventId=eventId))
+
+
+
+#chicken tinder routes 
+@app.route('/chicken-tinder/<int:eventId>') #ct should be tied to event
+def chickenTinder(eventId):
+    username = session['username']
+    #get remaning restaurants
     remaining = getRemainingRestaurants(eventId, username)
 
-    #if none return results
     if len(remaining) == 0:
         results = getResults(eventId)
-        #format the results and then resturn them
-        formatted_results = [{'id': r[0], 'name': r[1], 'imageUrl': r[2], 'votes': r[3]} for r in results]
-        return jsonify({'done': True, 'results': formatted_results})
-
-    #return next rest
-    restaurant = remaining[0]
-    return jsonify({
-        'done': False,
-        'restaurant': {'id': restaurant[0], 'name': restaurant[1], 'imageUrl': restaurant[2]},
-        'remaining': len(remaining)
-    })
-
-#record vote on rest (yes or no)
-@app.route('/api/chickenTinder/vote', methods = ['POST'])
-def submitVote():
-    data = request.json     #get vote data 
+        #if done show results
+        return render_template('chickenTinder.html', done=True, results=results, eventId=eventId)
     
+    #if not pick next rest and keep voting
+    restaurant = remaining[0]
+    return render_template('chickenTinder.html', done=False, restaurant=restaurant, eventId=eventId, username=username)
+
+@app.route('/chickenTinder/vote', methods = ['POST'])
+def submitVote():
+    #data = request.json #get vote data 
+    eventId = int(request.form['eventId'])
+    username = request.form['username']
+    restaurantId = int(request.form['restaurantId'])
+    vote = bool(int(request.form['vote']))
     #put vote in db 
-    recordVote(int(data['eventId']), data['username'], int(data['restaurantId']), bool(int(data['vote'])))
-    return jsonify({'success': True})
+    #recordVote(int(data['eventId']), data['username'], int(data['restaurantId']), bool(int(data['vote'])))
+    #return jsonify({'success': True})
+    recordVote(eventId, username, restaurantId, vote)
+    return redirect(url_for('chickenTinder', eventId=eventId))
 
-#display js test page :P
-@app.route('/chickenTinderTest')
-def chickenTinderTest():
-    return render_template('chickenTinder.html')
-
+@app.route('/friends')  
+def friends():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('friendFrontEnd.html')
 
 if __name__=='__main__':    #main
     app.run(debug=True)
