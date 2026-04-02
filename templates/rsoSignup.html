@@ -9,8 +9,8 @@
     <h2>Please enter your RSO information here</h2>
 
     <form action="{{ url_for('orgSignup') }}" method = "POST">
-        <label for="username">Username:</label><br>
-        <input type="text" name="username"><br><br>
+        <label for="text">Organization Name:</label><br>
+        <input type="text" name="orgName"><br><br>
         {% with messages = get_flashed_messages(category_filter="usererror") %}
                                 {% if messages %}
                                     {% for message in messages %}
@@ -37,8 +37,7 @@
                             {% endfor %}
                         {% endif %}
                     {% endwith %}
-        <label for="firstname">Organization Name:</label><br>
-        <input type="text" name="firstname"><br><br>
+        
 
         <label for="adminCode">Code:</label><br>
         <input type="number" name="adminCode"><br><br>

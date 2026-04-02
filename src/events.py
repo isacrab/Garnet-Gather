@@ -1,5 +1,5 @@
 #Events backend
-from db import createEvent, getEventById, getAllEvents, getEventMembers, joinEvent
+from src.db import createEvent, getEventById, getAllEvents, getEventMembers, joinEvent
 
 def createAnEvent(createData, createdBy):
     eventName = createData['eventName']

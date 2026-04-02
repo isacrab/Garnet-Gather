@@ -1,12 +1,12 @@
 #all things to make the app actually run
 from flask import Flask,render_template, request,redirect, url_for, jsonify,flash,session
-from db import *
+from src.db import *
 from chicken_tinder import recordVote, getRemainingRestaurants, getResults
 from datetime import timedelta
-from events import createAnEvent, getEvent, getEvents, joinAnEvent
-from schedule import *
+from src.events import createAnEvent, getEvent, getEvents, joinAnEvent
+from src.schedule import *
 from authen import *
-from friends_routes import friends_bp
+from src.friends_routes import friends_bp
 
 app = Flask(__name__)
 app.register_blueprint(friends_bp)
@@ -105,10 +105,9 @@ def rsoSignup():
 @app.route('/orgSignup', methods = ['POST', 'GET']) #for orgSignup, gets everything and makes RSO
 def orgSignup():
     if request.method == 'POST':
-        fsuid = request.form['username']
         password = request.form['password']
         email = request.form['email']
-        fName = request.form['firstname']
+        orgName = request.form['orgName']
         #lastname is being nulled out
         code = int(request.form['adminCode'])
     
@@ -117,9 +116,9 @@ def orgSignup():
             flash("Please enter a valid @fsu.edu email address.", "emailerror")
             return render_template('rsoSignup.html')
 
-        if not validUser(fsuid):    #check if already signed up
+        if not validUser(orgName):    #check if already signed up
             print("Account already exists")
-            flash("An account with that username already exists.", "usererror")
+            flash("An account with that organization name already exists.", "usererror")
             return render_template('rsoSignup.html')
 
         if not validEmail(email):    #check if email already in use
@@ -135,7 +134,7 @@ def orgSignup():
         password = hashPassword(password)    #hash password before putting in db
 
         if(code==8008135):
-            createUser(fsuid,password,email,fName, 0, code)    #actually creates user, in db.py 
+            createUser(orgName,password,email,None, None, code)    #actually creates user, in db.py 
         else:
             flash("Please enter a valid code.", "codeerror")
             return render_template('rsoSignup.html')

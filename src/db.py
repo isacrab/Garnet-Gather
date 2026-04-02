@@ -69,7 +69,7 @@ def createUsersTables():
                    'username VARCHAR(50) PRIMARY KEY, ' + 
                    'passwordHash VARCHAR(250) NOT NULL,' + 
                    'email VARCHAR(100) UNIQUE NOT NULL,' + 
-                   'firstName VARCHAR(50) NOT NULL,' +
+                   'firstName VARCHAR(50),' +
                    'lastName VARCHAR(50),' +         #can be null for RSO's
                    'role VARCHAR(20) NOT NULL DEFAULT \'Student\' '+
                    ')'
@@ -80,24 +80,6 @@ def createUsersTables():
     conn.commit()
     cursor.close()
     conn.close()
-
-#creates users, default param at end to determine what role it is
-def createUser(username,password,email,fname,lname,role=0):
-    if role!=0:
-        print("user is an rso admin") #RBAC TODO: assign roles
-    
-    conn = getConnection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-            INSERT INTO Users (username, passwordHash, email, firstName, lastName, role)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (username, password, email, fname, lname, role))       #works, checked with print statements
-    
-    conn.commit()
-    cursor.close()
-    conn.close()
-
 
 def createScheduleTable():
     conn=getConnection()
@@ -123,13 +105,14 @@ def createUser(username,password,email,fname,lname, role):
     try:
         conn = getConnection()
         cursor = conn.cursor()
+        print("things: ",username,password,email,fname,lname, role)
 
         if(role==8008135):    #role is admin
             print("Admin rights allowed")
             cursor.execute("""
                 INSERT INTO Users (username, passwordHash, email, firstName, lastName, role)
                 VALUES (%s, %s, %s, %s, %s, %s)
-            """, (username, password, email, fname, None, 'Admin'))       #works, checked with print statements
+            """, (username, password, email, None, None, 'Admin'))       #works, checked with print statements
 
 
             print("About to test the RSO table:")
