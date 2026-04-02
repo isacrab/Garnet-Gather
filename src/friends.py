@@ -2,7 +2,7 @@
 #handles all friend stuff
 #routes are handled separately in friends_routes.py, not app.py cause i dont want app.py to look messy
 
-from src.db import getConnection
+from db import getConnection
 
 
 #creates table if it dont already exist

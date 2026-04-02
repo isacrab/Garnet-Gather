@@ -2,7 +2,9 @@
 import mysql.connector
 import os
 import bcrypt
-from src.db import *
+from db import *
+from db import getConnection
+
 
 #authentication function to check if the entered email is an @fsu.edu email
 def realEmail(email):
@@ -20,7 +22,6 @@ def validPassword(password): #password needs to be at least 8 characters but at 
     return valid
     
 def validUser(username):
-    from src.db import getConnection
     conn = getConnection()
     cursor = conn.cursor()
 
@@ -35,7 +36,6 @@ def validUser(username):
     return valid
 
 def validEmail(email):
-    from src.db import getConnection
     conn = getConnection()
     cursor = conn.cursor()
 
@@ -50,7 +50,6 @@ def validEmail(email):
     return valid
 
 def hashPassword(password):
-    import bcrypt
     pw = password
     byte = pw.encode('utf-8')
     salt = bcrypt.gensalt()
@@ -60,7 +59,6 @@ def hashPassword(password):
     return hash
 
 def userExist(username,password):
-    from src.db import getConnection
     conn = getConnection()
     cursor = conn.cursor()
 

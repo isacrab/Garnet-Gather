@@ -3,7 +3,7 @@
 
 
 from flask import Blueprint, request,session, jsonify   #using blueprint to put routes for the friend features in its own file. request->reads data from bowser
-from src.friends import (
+from friends import (
     createFriendTables,
     sendFriendRequest, acceptFriendRequest, removeFriend, getFriends,getPendingRequests, 
     createGroup, addToGroup, leaveGroup, deleteGroup, getGroupMembers, getUserGroups,

@@ -1,5 +1,5 @@
 from logging import PlaceHolder
-from src.db import *
+from db import *
 from flask import request, render_template, redirect, url_for
 def schedulesubmit():
     username = request.form['username']

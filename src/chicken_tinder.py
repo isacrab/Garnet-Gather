@@ -1,5 +1,5 @@
 #Chicken tinder backend
-from src.db import getConnection
+from db import getConnection
 
 def getRestaurants():      #load restaurants into chicken tinder
     conn = getConnection()

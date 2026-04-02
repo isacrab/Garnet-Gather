@@ -1,14 +1,14 @@
 #all things to make the app actually run
 from flask import Flask,render_template, request,redirect, url_for, jsonify,flash,session
-from src.db import *
+from db import *
 from chicken_tinder import recordVote, getRemainingRestaurants, getResults
 from datetime import timedelta
-from src.events import createAnEvent, getEvent, getEvents, joinAnEvent
-from src.schedule import *
+from events import createAnEvent, getEvent, getEvents, joinAnEvent
+from schedule import *
 from authen import *
-from src.friends_routes import friends_bp
+from friends_routes import friends_bp
 
-app = Flask(__name__)
+app = Flask(__name__,template_folder="../templates")
 app.register_blueprint(friends_bp)
 app.secret_key ="23adkfn23rfnjfa98" 
 app.permanent_session_lifetime = timedelta(hours=5)
